@@ -11,6 +11,9 @@
  *
  * Повторяет семантику `lftp mirror --delete`: всё, чего нет в архиве, удаляется. Пока не прошёл
  * swap, старая версия сайта не тронута.
+ *
+ * ZIP читается своими силами через zlib: расширение zip включено не на каждом хостинге, а zlib есть
+ * почти везде. Архив собирает наш CI (`zip -qr`), поэтому хватает методов stored и deflate без zip64.
  */
 
 const STEP_BUDGET = 10;
@@ -60,6 +63,110 @@ function fail($state, $message)
 	respond('DEPLOY_CONTINUE: failed (' . $message . '), cleaning up');
 }
 
+// Ранняя ошибка, до начала распаковки: убираем за собой архив, рабочую папку и сам распаковщик
+function abort($message)
+{
+	global $lock, $work, $zipPath;
+	if (!empty($lock)) {
+		flock($lock, LOCK_UN);
+		fclose($lock);
+	}
+	@unlink($work . '/lock');
+	@rmdir($work . '/new');
+	@rmdir($work . '/old');
+	@rmdir($work);
+	@unlink($zipPath);
+	@unlink(__FILE__);
+	respond('DEPLOY_FAILED: ' . $message);
+}
+
+// Записи центрального каталога ZIP: имя, метод сжатия, размеры, CRC и смещение локального заголовка
+function zipEntries($path)
+{
+	$size = filesize($path);
+	$fp = fopen($path, 'rb');
+	if (!$fp || $size < 22) {
+		return null;
+	}
+	// Запись «конец центрального каталога» лежит в последних 22 байтах плюс комментарий до 64 КБ
+	$tail = min($size, 22 + 65535);
+	fseek($fp, $size - $tail);
+	$data = fread($fp, $tail);
+	$pos = strrpos($data, "PK\x05\x06");
+	if ($pos === false) {
+		fclose($fp);
+		return null;
+	}
+	$end = unpack('vdisk/vcdDisk/vdiskEntries/ventries/VcdSize/VcdOffset', substr($data, $pos + 4, 16));
+	fseek($fp, $end['cdOffset']);
+	$cd = fread($fp, $end['cdSize']);
+	fclose($fp);
+
+	$entries = [];
+	$p = 0;
+	for ($i = 0; $i < $end['entries']; $i++) {
+		if (substr($cd, $p, 4) !== "PK\x01\x02") {
+			return null;
+		}
+		$h = unpack(
+			'vmade/vneed/vflags/vmethod/vtime/vdate/Vcrc/Vcsize/Vsize/vnameLen/vextraLen/vcommentLen/vdisk/vinternal/Vexternal/Voffset',
+			substr($cd, $p + 4, 42)
+		);
+		$entries[] = [
+			'name' => substr($cd, $p + 46, $h['nameLen']),
+			'flags' => $h['flags'],
+			'method' => $h['method'],
+			'crc' => $h['crc'],
+			'csize' => $h['csize'],
+			'size' => $h['size'],
+			'offset' => $h['offset'],
+		];
+		$p += 46 + $h['nameLen'] + $h['extraLen'] + $h['commentLen'];
+	}
+	return $entries;
+}
+
+// Распаковывает одну запись в $dest. Возвращает false при любой ошибке, в том числе при неверной CRC
+function extractEntry($fp, $entry, $dest)
+{
+	$name = $entry['name'];
+	// Никаких абсолютных путей и выходов наверх через ..
+	if ($name === '' || $name[0] === '/' || preg_match('#(^|/)\.\.(/|$)#', $name) || ($entry['flags'] & 1)) {
+		return false;
+	}
+	$target = $dest . '/' . $name;
+	if (substr($name, -1) === '/') {
+		return is_dir($target) || mkdir($target, 0755, true);
+	}
+	$dir = dirname($target);
+	if (!is_dir($dir) && !mkdir($dir, 0755, true)) {
+		return false;
+	}
+	fseek($fp, $entry['offset']);
+	$local = unpack('Vsig/vneed/vflags/vmethod/vtime/vdate/Vcrc/Vcsize/Vsize/vnameLen/vextraLen', fread($fp, 30));
+	if ($local['sig'] !== 0x04034b50) {
+		return false;
+	}
+	fseek($fp, $entry['offset'] + 30 + $local['nameLen'] + $local['extraLen']);
+	$raw = $entry['csize'] > 0 ? fread($fp, $entry['csize']) : '';
+	if ($entry['size'] === 0) {
+		$content = '';
+	} elseif ($entry['method'] === 8) {
+		$content = gzinflate($raw);
+	} elseif ($entry['method'] === 0) {
+		$content = $raw;
+	} else {
+		return false;
+	}
+	if ($content === false || strlen($content) !== $entry['size']) {
+		return false;
+	}
+	if (sprintf('%08x', $entry['crc']) !== hash('crc32b', $content)) {
+		return false;
+	}
+	return file_put_contents($target, $content) !== false;
+}
+
 function listDir($path)
 {
 	return array_values(array_diff(scandir($path), ['.', '..']));
@@ -90,7 +197,7 @@ if ((isset($_GET['action']) ? $_GET['action'] : '') !== 'step') {
 }
 
 if (!is_dir($work) && !mkdir($work, 0755)) {
-	respond('DEPLOY_FAILED: cannot create work dir');
+	abort('cannot create work dir');
 }
 
 // Если предыдущий вызов ещё работает (CI не дождался ответа), не мешаем ему
@@ -102,30 +209,30 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $state = is_file($statePath) ? json_decode(file_get_contents($statePath), true) : null;
 
 if (!$state) {
-	if (!class_exists('ZipArchive')) {
-		respond('DEPLOY_FAILED: PHP extension "zip" is not available');
+	if (!function_exists('gzinflate')) {
+		abort('PHP extension "zlib" is not available');
 	}
 	if (!is_file($zipPath)) {
-		respond('DEPLOY_FAILED: archive ' . $zipName . ' not found');
+		abort('archive ' . $zipName . ' not found');
 	}
 	if ((!is_dir($newDir) && !mkdir($newDir, 0755)) || (!is_dir($oldDir) && !mkdir($oldDir, 0755))) {
-		respond('DEPLOY_FAILED: cannot create work dir');
+		abort('cannot create work dir');
 	}
 	$state = ['phase' => 'extract', 'next' => 0];
 	saveState($state);
 }
 
 if ($state['phase'] === 'extract') {
-	$zip = new ZipArchive();
-	if ($zip->open($zipPath) !== true) {
-		fail($state, 'cannot open archive');
+	$entries = zipEntries($zipPath);
+	$fp = fopen($zipPath, 'rb');
+	if ($entries === null || !$fp) {
+		fail($state, 'cannot read archive');
 	}
-	$total = $zip->numFiles;
+	$total = count($entries);
 	for ($i = $state['next']; $i < $total; $i++) {
-		$entry = $zip->getNameIndex($i);
-		if (!$zip->extractTo($newDir, $entry)) {
-			$zip->close();
-			fail($state, 'cannot extract ' . $entry);
+		if (!extractEntry($fp, $entries[$i], $newDir)) {
+			fclose($fp);
+			fail($state, 'cannot extract ' . $entries[$i]['name']);
 		}
 		if (($i + 1) % SAVE_EVERY === 0) {
 			$state['next'] = $i + 1;
@@ -134,11 +241,11 @@ if ($state['phase'] === 'extract') {
 		if (timeIsUp()) {
 			$state['next'] = $i + 1;
 			saveState($state);
-			$zip->close();
+			fclose($fp);
 			respond('DEPLOY_CONTINUE: extracted ' . ($i + 1) . '/' . $total);
 		}
 	}
-	$zip->close();
+	fclose($fp);
 
 	if (!is_file($newDir . '/index.html')) {
 		fail($state, 'index.html is missing in archive');

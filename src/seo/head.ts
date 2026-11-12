@@ -1,0 +1,93 @@
+import {pathFor, type Route} from '../app/routes'
+import {AUTHOR_LINKS, type Lang, LANGS, OG_LOCALES, SITE_ORIGIN} from '../config'
+import {type Dict, fmt} from '../i18n'
+import {calendarTitle} from './title'
+
+export interface HeadElement {
+	type: string
+	props: Record<string, string>
+	children?: string
+}
+
+export interface Head {
+	lang: string
+	title: string
+	elements: Set<HeadElement>
+}
+
+const meta = (name: string, content: string): HeadElement => ({
+	type: 'meta',
+	props: name.startsWith('og:') ? {property: name, content} : {name, content},
+})
+
+const link = (props: Record<string, string>): HeadElement => ({type: 'link', props})
+
+const url = (path: string) => `${SITE_ORIGIN}${path}`
+
+/** Все мета-теги страницы: title, description, canonical, hreflang, Open Graph, JSON-LD */
+export const buildHead = (route: Route, t: Dict, year: number): Head => {
+	const lang: Lang = route.kind === 'app' ? route.lang : 'ru'
+
+	if (route.kind === 'notFound') {
+		return {
+			lang,
+			title: `404 · ${t.meta.siteName}`,
+			elements: new Set([meta('robots', 'noindex')]),
+		}
+	}
+
+	const routeYear = route.kind === 'app' ? route.year : null
+	const path = route.kind === 'root' ? '/' : pathFor(lang, routeYear)
+	const title =
+		route.kind === 'root'
+			? t.meta.titleCurrent
+			: calendarTitle(t, routeYear ?? year, routeYear != null)
+	const description =
+		route.kind === 'root'
+			? t.meta.rootDescription
+			: fmt(t.meta.description, {year: routeYear ?? year})
+	const image = url(`/og/${lang}.png`)
+
+	const elements: HeadElement[] = [
+		meta('description', description),
+		link({rel: 'canonical', href: url(path)}),
+		...LANGS.map(l => link({rel: 'alternate', hreflang: l, href: url(pathFor(l, routeYear))})),
+		link({
+			rel: 'alternate',
+			hreflang: 'x-default',
+			href: url(routeYear == null ? '/' : pathFor('ru', routeYear)),
+		}),
+		meta('og:type', 'website'),
+		meta('og:site_name', t.meta.siteName),
+		meta('og:title', title),
+		meta('og:description', description),
+		meta('og:url', url(path)),
+		meta('og:image', image),
+		meta('og:image:width', '1200'),
+		meta('og:image:height', '630'),
+		meta('og:locale', OG_LOCALES[lang]),
+		...LANGS.filter(l => l !== lang).map(l => meta('og:locale:alternate', OG_LOCALES[l])),
+		meta('twitter:card', 'summary_large_image'),
+		meta('twitter:title', title),
+		meta('twitter:description', description),
+		meta('twitter:image', image),
+		{
+			type: 'script',
+			props: {type: 'application/ld+json'},
+			children: JSON.stringify({
+				'@context': 'https://schema.org',
+				'@type': 'WebApplication',
+				name: t.meta.siteName,
+				url: url(path),
+				description,
+				inLanguage: lang,
+				applicationCategory: 'UtilitiesApplication',
+				operatingSystem: 'Any',
+				offers: {'@type': 'Offer', price: '0', priceCurrency: 'USD'},
+				author: {'@type': 'Person', name: 'Misha Saidov', url: AUTHOR_LINKS.cv},
+			}).replace(/</g, '\\u003c'),
+		},
+	]
+
+	return {lang, title, elements: new Set(elements)}
+}

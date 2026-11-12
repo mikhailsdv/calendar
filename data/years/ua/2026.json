@@ -1,0 +1,83 @@
+{
+	"country": "ua",
+	"year": 2026,
+	"status": "official",
+	"statusNote": "Весь год действует военное положение: праздники — рабочие дни, переносов и сокращённых дней нет.",
+	"sources": [
+		{
+			"title": "buhplatforma.com.ua: выходные дни 2026 в Украине",
+			"url": "https://buhplatforma.com.ua/article/18450-vykhidni-dni-2026-roku-v-ukraini-kalendar-sviat-i-perenesen"
+		},
+		{
+			"title": "buhplatforma.com.ua: праздники в отпуске при военном положении",
+			"url": "https://buhplatforma.com.ua/article/8218-vihdn-u-vdpustts-oplachumo-tabelyumo"
+		}
+	],
+	"regimes": [
+		{
+			"id": "martial_law",
+			"from": "2026-01-01",
+			"to": "2026-12-31"
+		}
+	],
+	"officialNorms": {
+		"workdays": 261
+	},
+	"days": {
+		"2026-01-01": {
+			"type": "observance",
+			"holiday": "new_year",
+			"regime": "martial_law"
+		},
+		"2026-03-08": {
+			"type": "observance",
+			"holiday": "womens_day",
+			"regime": "martial_law"
+		},
+		"2026-04-12": {
+			"type": "observance",
+			"holiday": "easter",
+			"regime": "martial_law"
+		},
+		"2026-05-01": {
+			"type": "observance",
+			"holiday": "labour_day",
+			"regime": "martial_law"
+		},
+		"2026-05-08": {
+			"type": "observance",
+			"holiday": "remembrance_day",
+			"regime": "martial_law"
+		},
+		"2026-05-31": {
+			"type": "observance",
+			"holiday": "trinity",
+			"regime": "martial_law"
+		},
+		"2026-06-28": {
+			"type": "observance",
+			"holiday": "constitution_day",
+			"regime": "martial_law"
+		},
+		"2026-07-15": {
+			"type": "observance",
+			"holiday": "statehood_day",
+			"regime": "martial_law"
+		},
+		"2026-08-24": {
+			"type": "observance",
+			"holiday": "independence_day",
+			"regime": "martial_law"
+		},
+		"2026-10-01": {
+			"type": "observance",
+			"holiday": "defenders_day",
+			"regime": "martial_law"
+		},
+		"2026-12-25": {
+			"type": "observance",
+			"holiday": "christmas",
+			"regime": "martial_law"
+		}
+	}
+}

@@ -1,0 +1,6 @@
+dist
+node_modules
+package-lock.json
+public/og
+# Собирается из events.json командой npm run goals
+docs/metrika-goals.md

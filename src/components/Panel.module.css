@@ -1,0 +1,365 @@
+.panel {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.body {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.sheetHead {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+/* Кнопки прижаты к верху: если заголовок переносится на две строки, они остаются у первой */
+.headRow {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 8px;
+	min-height: 36px;
+}
+
+/* Однострочный заголовок («Отпуск») по высоте равен кнопкам, поэтому стоит с ними на одной линии */
+.headRow > .title {
+	display: flex;
+	align-items: center;
+	min-height: 36px;
+}
+
+.headActions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	min-height: 36px;
+}
+
+.headActions:empty {
+	display: none;
+}
+
+.navBtn {
+	min-width: 0;
+	color: var(--accent-text);
+}
+
+.navBtn span {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+@media (min-width: 1024px) {
+	.panel {
+		position: sticky;
+		top: 16px;
+		max-height: calc(100vh - 32px);
+		overflow-y: auto;
+		padding: 16px;
+		border: 1px solid var(--border);
+		border-radius: var(--radius);
+		background: var(--surface);
+	}
+
+	.grabber,
+	.navBtn,
+	.close {
+		display: none;
+	}
+}
+
+/* На телефоне и планшете панель — нижняя шторка: свёрнутой видна только шапка, тело прокручивается само */
+@media (max-width: 1023px) {
+	.panel {
+		position: fixed;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		z-index: 20;
+		max-height: 75vh;
+		padding: 8px 16px 0;
+		gap: 12px;
+		overflow: hidden;
+		border-top: 1px solid var(--border);
+		border-radius: 16px 16px 0 0;
+		background: var(--bg);
+		box-shadow: var(--shadow);
+		transform: translateY(calc(100% + 24px));
+		transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	.panel[data-open='full'] {
+		transform: none;
+	}
+
+	.panel[data-open='peek'] {
+		transform: translateY(calc(100% - var(--peek, 120px) - env(safe-area-inset-bottom)));
+	}
+
+	.body {
+		min-height: 0;
+		margin: 0 -16px;
+		padding: 0 16px calc(16px + env(safe-area-inset-bottom));
+		overflow-y: auto;
+		overscroll-behavior: contain;
+	}
+
+	.sheetHead {
+		touch-action: none;
+		-webkit-user-select: none;
+		user-select: none;
+		cursor: grab;
+	}
+
+	/* Ручка — кнопка с большой зоной касания, сама полоска рисуется псевдоэлементом */
+	.grabber {
+		position: relative;
+		align-self: center;
+		width: 64px;
+		height: 18px;
+		margin: -6px 0 -6px;
+		padding: 0;
+		border: 0;
+		background: none;
+		cursor: grab;
+	}
+
+	.grabber::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: 12px;
+		right: 12px;
+		height: 5px;
+		margin-top: -2.5px;
+		border-radius: 3px;
+		background: var(--border-strong);
+	}
+}
+
+.title {
+	font-size: 17px;
+	font-weight: 650;
+	line-height: 1.35;
+}
+
+.sub {
+	margin-top: 2px;
+	font-size: 13px;
+	color: var(--text-2);
+}
+
+.rows {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.row {
+	display: grid;
+	grid-template-columns: 4px minmax(0, 1fr);
+	column-gap: 10px;
+	padding: 10px 0;
+	border-top: 1px solid var(--border);
+}
+
+.row:first-child {
+	border-top: 0;
+}
+
+.stripe {
+	grid-row: 1 / span 3;
+	border-radius: 2px;
+	background: var(--c);
+}
+
+.country {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 600;
+	font-size: 14px;
+}
+
+.status {
+	margin-top: 2px;
+	font-size: 14px;
+}
+
+.meta {
+	margin-top: 2px;
+	font-size: 13px;
+	color: var(--text-2);
+}
+
+.linkBtn {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--accent-text);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	font-size: 13px;
+}
+
+.off {
+	color: var(--text);
+}
+
+.empty {
+	font-size: 14px;
+	color: var(--text-2);
+}
+
+.stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 12px;
+	font-size: 13px;
+	color: var(--text-2);
+}
+
+.ratio {
+	margin-left: auto;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--accent-bg);
+	color: var(--accent-text);
+	font-weight: 600;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+.hint {
+	padding: 10px 12px;
+	border-radius: var(--radius-sm);
+	background: var(--accent-bg);
+	font-size: 14px;
+}
+
+.hint b {
+	display: block;
+	margin-bottom: 2px;
+	color: var(--accent-text);
+}
+
+.hintRow {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.navigator {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding-top: 12px;
+	border-top: 1px solid var(--border);
+}
+
+.navTitle {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-weight: 650;
+}
+
+.horizon {
+	margin: 2px 0 0 24px;
+	font-size: 12px;
+	color: var(--text-2);
+}
+
+.navTitle svg {
+	width: 18px;
+	height: 18px;
+	color: var(--accent);
+}
+
+.controls {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: var(--text-2);
+}
+
+.stepper {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.stepper output {
+	min-width: 2ch;
+	text-align: center;
+	font-weight: 600;
+	color: var(--text);
+	font-variant-numeric: tabular-nums;
+}
+
+.windows {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.window {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 8px 10px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: var(--bg);
+	text-align: left;
+	font-size: 14px;
+}
+
+.window span {
+	display: block;
+	font-size: 12px;
+	color: var(--text-2);
+}
+
+@media (hover: hover) {
+	.window:hover {
+		border-color: var(--accent);
+	}
+}
+
+.upcoming {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+
+/* Флаги стран, у которых праздник, — справа в строке */
+.flags {
+	display: flex;
+	flex: none;
+	gap: 4px;
+	margin-left: auto;
+}
+
+.window .flags {
+	display: flex;
+}
+
+/* Кнопка «Поделиться» после копирования ссылки */
+.copied {
+	color: var(--accent-text);
+}

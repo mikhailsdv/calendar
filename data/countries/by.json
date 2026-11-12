@@ -1,0 +1,171 @@
+{
+	"id": "by",
+	"iso": "BY",
+	"name": {
+		"ru": "Беларусь",
+		"en": "Belarus",
+		"kk": "Беларусь",
+		"hy": "Բելառուս",
+		"be": "Беларусь",
+		"uk": "Білорусь"
+	},
+	"locale": "ru-BY",
+	"timezone": "Europe/Minsk",
+	"seasons": "meteo-north",
+	"week": {
+		"start": 1,
+		"weekend": [6, 7]
+	},
+	"workTime": {
+		"weekHours": [40, 36, 24],
+		"hoursPerDay": {
+			"40": 8,
+			"36": 7.2,
+			"24": 4.8
+		}
+	},
+	"rules": {
+		"weekendHoliday": "none",
+		"weekendHolidayNote": "Праздник, выпавший на выходной, не переносится. Мосты делают постановлением Совмина: будний день ↔ рабочая суббота.",
+		"decreeTransfers": true,
+		"preHolidayShortening": {
+			"hours": 1
+		},
+		"transferredWorkdayInheritsHours": true
+	},
+	"leave": {
+		"unit": "calendar",
+		"minDays": 24,
+		"notCounted": ["holiday"],
+		"note": "Государственные праздники и праздничные нерабочие дни в отпуск не включаются."
+	},
+	"holidays": {
+		"new_year": {
+			"name": {
+				"ru": "Новый год",
+				"en": "New Year",
+				"kk": "Жаңа жыл",
+				"hy": "Նոր տարի",
+				"be": "Новы год",
+				"uk": "Новий рік"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["01-01", "01-02"]
+			}
+		},
+		"christmas_orthodox": {
+			"name": {
+				"ru": "Рождество Христово (православное)",
+				"en": "Orthodox Christmas",
+				"kk": "Православиелік Рождество",
+				"hy": "Ուղղափառ Սուրբ Ծնունդ",
+				"be": "Нараджэнне Хрыстова (праваслаўнае)",
+				"uk": "Різдво Христове (православне)"
+			},
+			"kind": "religious",
+			"rule": {
+				"fixed": ["01-07"]
+			}
+		},
+		"womens_day": {
+			"name": {
+				"ru": "День женщин",
+				"en": "Women's Day",
+				"kk": "Әйелдер күні",
+				"hy": "Կանանց օր",
+				"be": "Дзень жанчын",
+				"uk": "День жінок"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["03-08"]
+			}
+		},
+		"radunitsa": {
+			"name": {
+				"ru": "Радуница",
+				"en": "Radunitsa",
+				"kk": "Радуница",
+				"hy": "Ռադունիցա",
+				"be": "Радаўніца",
+				"uk": "Радониця"
+			},
+			"kind": "religious",
+			"rule": {
+				"easter": "orthodox",
+				"offset": 9
+			}
+		},
+		"labour_day": {
+			"name": {
+				"ru": "Праздник труда",
+				"en": "Labour Day",
+				"kk": "Еңбек мерекесі",
+				"hy": "Աշխատանքի տոն",
+				"be": "Свята працы",
+				"uk": "Свято праці"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["05-01"]
+			}
+		},
+		"victory_day": {
+			"name": {
+				"ru": "День Победы",
+				"en": "Victory Day",
+				"kk": "Жеңіс күні",
+				"hy": "Հաղթանակի օր",
+				"be": "Дзень Перамогі",
+				"uk": "День Перемоги"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["05-09"]
+			}
+		},
+		"independence_day": {
+			"name": {
+				"ru": "День Независимости",
+				"en": "Independence Day",
+				"kk": "Тәуелсіздік күні",
+				"hy": "Անկախության օր",
+				"be": "Дзень Незалежнасці",
+				"uk": "День Незалежності"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["07-03"]
+			}
+		},
+		"october_revolution": {
+			"name": {
+				"ru": "День Октябрьской революции",
+				"en": "October Revolution Day",
+				"kk": "Қазан революциясы күні",
+				"hy": "Հոկտեմբերյան հեղափոխության օր",
+				"be": "Дзень Кастрычніцкай рэвалюцыі",
+				"uk": "День Жовтневої революції"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["11-07"]
+			}
+		},
+		"christmas_catholic": {
+			"name": {
+				"ru": "Рождество Христово (католическое)",
+				"en": "Catholic Christmas",
+				"kk": "Католиктік Рождество",
+				"hy": "Կաթոլիկ Սուրբ Ծնունդ",
+				"be": "Нараджэнне Хрыстова (каталіцкае)",
+				"uk": "Різдво Христове (католицьке)"
+			},
+			"kind": "religious",
+			"rule": {
+				"fixed": ["12-25"]
+			}
+		}
+	}
+}

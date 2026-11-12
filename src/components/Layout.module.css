@@ -1,0 +1,609 @@
+.page {
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 16px 16px 160px;
+}
+
+@media (min-width: 1024px) {
+	.page {
+		padding: 24px 24px 48px;
+	}
+}
+
+/* Заголовок слева, группа «язык · тема · настройки» справа, подзаголовок на всю ширину */
+.header {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-areas:
+		'title actions'
+		'subtitle subtitle';
+	align-items: start;
+	gap: 2px 16px;
+	margin-bottom: 24px;
+}
+
+.title {
+	grid-area: title;
+	font-size: 22px;
+	overflow-wrap: break-word;
+	hyphens: auto;
+}
+
+.brand {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-2);
+	letter-spacing: 0.02em;
+	text-transform: uppercase;
+}
+
+.subtitle {
+	grid-area: subtitle;
+	max-width: 60ch;
+	font-size: 14px;
+	color: var(--text-2);
+}
+
+@media (min-width: 640px) {
+	.title {
+		font-size: 26px;
+	}
+	.subtitle {
+		font-size: 15px;
+	}
+}
+
+/* Общая «дорожка» для групп кнопок, как у переключателей вида */
+.actions,
+.period {
+	display: flex;
+	align-items: center;
+	padding: 2px;
+	border-radius: var(--radius-sm);
+	background: var(--surface-2);
+}
+
+.actions {
+	grid-area: actions;
+	gap: 2px;
+}
+
+.actions :global(.btn),
+.period :global(.btn) {
+	min-height: 32px;
+	border-color: transparent;
+	background: transparent;
+	color: var(--text-2);
+}
+
+.actions :global(.btn-icon),
+.period :global(.btn-icon) {
+	width: 32px;
+}
+
+@media (hover: hover) {
+	.actions :global(.btn:hover),
+	.period :global(.btn:not(:disabled):hover) {
+		background: var(--bg);
+		color: var(--text);
+	}
+}
+
+/*
+ * Тулбар: на телефоне три строки (вид, период, режим и «Сегодня»), на планшете сетка 2×2,
+ * на десктопе одна строка
+ */
+.toolbar {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-areas:
+		'views views'
+		'period period'
+		'modes today';
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.period {
+	grid-area: period;
+}
+
+.views {
+	grid-area: views;
+}
+
+.modes {
+	grid-area: modes;
+}
+
+.today {
+	grid-area: today;
+}
+
+.toolbar :global(.segmented) {
+	display: flex;
+}
+
+.toolbar :global(.segmented) button {
+	flex: 1 1 auto;
+}
+
+.nav {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	min-width: 0;
+}
+
+/*
+ * Выбор месяца раскрывается как аккордеон: колонка сетки растёт из 0fr в 1fr,
+ * поэтому соседние элементы сдвигаются плавно, без скачка. Содержимое не сжимается,
+ * а обрезается краем колонки, чтобы подписи не прыгали во время анимации.
+ */
+.period {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 0fr);
+}
+
+.period[data-month] {
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.monthSlot {
+	display: flex;
+	min-width: 0;
+	overflow: hidden;
+	opacity: 0;
+}
+
+.period[data-month] .monthSlot {
+	opacity: 1;
+}
+
+/* Анимация включается после загрузки, чтобы сохранённый вид «Месяц» не разворачивался при открытии */
+:global(html[data-ready]) .period {
+	transition: grid-template-columns 0.24s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+:global(html[data-ready]) .monthSlot {
+	transition: opacity 0.2s ease;
+}
+
+.monthNav {
+	position: relative;
+	flex: 1 0 auto;
+	margin-left: 4px;
+	padding-left: 4px;
+}
+
+/* Короткий бледный разделитель между годом и месяцем, не на всю высоту */
+.monthNav::before {
+	content: '';
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 1px;
+	height: 16px;
+	background: var(--border-strong);
+	opacity: 0.6;
+	transform: translateY(-50%);
+}
+
+.navLabel {
+	flex: 1;
+	min-width: 4.5ch;
+	padding: 0 4px;
+	text-align: center;
+	font-weight: 650;
+	font-variant-numeric: tabular-nums;
+	text-transform: capitalize;
+	white-space: nowrap;
+}
+
+.navLabelMonth {
+	min-width: 8.5ch;
+}
+
+@media (min-width: 640px) {
+	.toolbar {
+		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+		grid-template-areas:
+			'period today'
+			'views modes';
+	}
+}
+
+@media (min-width: 1024px) {
+	.toolbar {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+	/* На десктопе год по ширине содержимого, месяц раскрывается до своей ширины */
+	.period {
+		grid-template-columns: auto minmax(0, 0fr);
+	}
+	.period[data-month] {
+		grid-template-columns: auto minmax(0, 1fr);
+	}
+	.toolbar :global(.segmented) button {
+		flex: none;
+	}
+	.today {
+		margin-left: auto;
+	}
+}
+
+.chips {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 16px;
+}
+
+.chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	min-height: 34px;
+	padding: 0 12px 0 8px;
+	border: 1px solid var(--border-strong);
+	border-radius: 999px;
+	background: var(--bg);
+	font-size: 14px;
+	color: var(--text-2);
+}
+
+.chip[aria-pressed='true'] {
+	border-color: var(--c);
+	background: var(--bg);
+	color: var(--text);
+	box-shadow: inset 0 0 0 1px var(--c);
+}
+
+.chip[aria-pressed='false'] svg {
+	filter: grayscale(1);
+	opacity: 0.5;
+}
+
+.dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--c);
+}
+
+.home {
+	font-size: 11px;
+	color: var(--text-3);
+}
+
+.limit {
+	font-size: 13px;
+	color: var(--warning-text);
+}
+
+.layout {
+	display: grid;
+	gap: 16px;
+}
+
+.layout > * {
+	min-width: 0;
+}
+
+/* Календарь при листании месяцев сдвигается вбок: не даём ему растянуть страницу по ширине */
+.calendarCol {
+	overflow-x: clip;
+}
+
+@media (min-width: 1024px) {
+	.layout {
+		grid-template-columns: minmax(0, 1fr) 340px;
+		align-items: start;
+		gap: 24px;
+	}
+}
+
+.section {
+	margin-top: 40px;
+}
+
+.section > h2 {
+	margin-bottom: 12px;
+}
+
+.countryBlock {
+	margin-top: 20px;
+}
+
+.countryTitle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 8px;
+}
+
+.rules {
+	display: grid;
+	gap: 16px;
+}
+
+@media (min-width: 768px) {
+	.rules {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.rules ul {
+	margin: 6px 0 0;
+	padding-left: 18px;
+	color: var(--text-2);
+	font-size: 14px;
+}
+
+.rules li + li {
+	margin-top: 4px;
+}
+
+.muted {
+	color: var(--text-2);
+	font-size: 13px;
+}
+
+.sources {
+	margin-top: 6px;
+	font-size: 13px;
+	color: var(--text-2);
+}
+
+.sources a {
+	margin-right: 10px;
+}
+
+.details {
+	margin-top: 12px;
+}
+
+.details .spoilerToggle {
+	color: var(--accent-text);
+	font-size: 14px;
+}
+
+/* Спойлер-аккордеон: кнопка с шевроном, тело раскрывается анимацией высоты */
+.spoilerHeading {
+	margin: 0;
+}
+
+.spoilerToggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 0;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.spoilerToggle .countryTitle {
+	margin: 0;
+}
+
+.countryBlock.spoiler {
+	margin-top: 14px;
+}
+
+/* Отступ под заголовком — внутри анимируемого тела, чтобы он раскрывался вместе со списком */
+.spoilerBody {
+	padding-top: 8px;
+}
+
+.chevron {
+	color: var(--text-3);
+	transition: transform 0.2s ease;
+}
+
+.spoiler[data-expanded] .spoilerToggle .chevron {
+	transform: rotate(90deg);
+}
+
+@media (hover: hover) {
+	.spoilerToggle:hover .chevron {
+		color: var(--text);
+	}
+}
+
+.footer {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-top: 48px;
+	padding-top: 16px;
+	border-top: 1px solid var(--border);
+	font-size: 14px;
+	color: var(--text-2);
+}
+
+.footerLinks {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+}
+
+/* ---------- language menu ---------- */
+.langWrap {
+	position: relative;
+}
+
+.langMenu {
+	position: absolute;
+	right: 0;
+	top: calc(100% + 6px);
+	z-index: 30;
+	min-width: 200px;
+	margin: 0;
+	padding: 6px;
+	list-style: none;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--bg);
+	box-shadow: var(--shadow);
+}
+
+.langMenu a {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 40px;
+	padding: 0 10px;
+	border-radius: var(--radius-sm);
+	color: var(--text);
+	text-decoration: none;
+}
+
+.langMenu a[aria-current='page'] {
+	background: var(--surface-2);
+	font-weight: 600;
+}
+
+@media (hover: hover) {
+	.langMenu a:hover {
+		background: var(--surface);
+	}
+}
+
+.langCode {
+	font-size: 13px;
+	font-weight: 600;
+	text-transform: uppercase;
+}
+
+/* На телефоне у языка остаётся только флаг, чтобы заголовку хватило места */
+@media (max-width: 639px) {
+	.langCode {
+		display: none;
+	}
+	.langWrap :global(.btn) {
+		width: 32px;
+		padding: 0;
+	}
+}
+
+/* ---------- settings dialog ---------- */
+.dialog {
+	width: min(420px, calc(100vw - 32px));
+	padding: 20px;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	background: var(--bg);
+	color: var(--text);
+	box-shadow: var(--shadow);
+}
+
+.dialog::backdrop {
+	background: rgba(0, 0, 0, 0.35);
+}
+
+.field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 14px;
+	font-size: 14px;
+}
+
+.field small {
+	color: var(--text-3);
+}
+
+.check {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 18px;
+	font-size: 14px;
+	cursor: pointer;
+}
+
+.dialogActions {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 20px;
+}
+
+/* ---------- static pages ---------- */
+.center {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	max-width: 520px;
+	margin: 12vh auto 0;
+	padding: 0 16px;
+	text-align: center;
+}
+
+.langList {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 8px;
+	width: 100%;
+	margin: 8px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.langList a {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	color: var(--text);
+	text-decoration: none;
+}
+
+/* На телефоне кнопки печати нет: печатают с компьютера, а заголовку нужно место */
+@media (max-width: 639px) {
+	.printBtn {
+		display: none;
+	}
+}
+
+@media print {
+	.page {
+		max-width: none;
+		padding: 0;
+	}
+	.header {
+		margin-bottom: 8px;
+	}
+	.subtitle,
+	.chip[aria-pressed='false'],
+	.limit,
+	.home,
+	.spoilerToggle .chevron {
+		display: none;
+	}
+	/* Активные страны печатаются как легенда цветов */
+	.chips {
+		margin-bottom: 8px;
+	}
+	.chip {
+		min-height: 24px;
+		padding: 0 8px 0 6px;
+		font-size: 11px;
+	}
+	/* Календарь на первой странице, таблицы — со следующей */
+	.layout + .section {
+		break-before: page;
+		margin-top: 0;
+	}
+}

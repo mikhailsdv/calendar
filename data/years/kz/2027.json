@@ -1,0 +1,112 @@
+{
+	"country": "kz",
+	"year": 2027,
+	"status": "forecast",
+	"statusNote": "Переносы посчитаны по правилу «праздник на выходном → следующий рабочий день». Перенос 02.01 → 04.01 подтверждён в СМИ, остальное — расчёт. Правительство может добавить мосты. Курбан айт — по календарю ДУМК, может сдвинуться на день.",
+	"sources": [
+		{
+			"title": "lada.kz: Курбан айт 2027 без переноса",
+			"url": "https://www.lada.kz/kazakhstan-news/160388-kazakhstantsy-ostanutsia-bez-dopolnitelnogo-vykhodnogo-na-kurban-ait-v-2027-godu.html"
+		},
+		{
+			"title": "digitalbusiness.kz: январь 2027",
+			"url": "https://digitalbusiness.kz/2026-10-05/kazahstantsev-zhdet-korotkiy-dekabr-i-dlinnie-novogodnie-vihodnie-iz-za-perenosom/"
+		}
+	],
+	"days": {
+		"2027-01-01": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2027-01-02": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2027-01-04": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2027-01-02"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2027-01-07": {
+			"type": "holiday",
+			"holiday": "christmas"
+		},
+		"2027-03-08": {
+			"type": "holiday",
+			"holiday": "womens_day"
+		},
+		"2027-03-09": {
+			"type": "observance",
+			"holiday": "oraza_ait",
+			"tentative": true
+		},
+		"2027-03-21": {
+			"type": "holiday",
+			"holiday": "nauryz"
+		},
+		"2027-03-22": {
+			"type": "holiday",
+			"holiday": "nauryz"
+		},
+		"2027-03-23": {
+			"type": "holiday",
+			"holiday": "nauryz"
+		},
+		"2027-03-24": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2027-03-21"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2027-05-01": {
+			"type": "holiday",
+			"holiday": "unity_day"
+		},
+		"2027-05-03": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2027-05-01"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2027-05-07": {
+			"type": "holiday",
+			"holiday": "defender_day"
+		},
+		"2027-05-09": {
+			"type": "holiday",
+			"holiday": "victory_day"
+		},
+		"2027-05-10": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2027-05-09"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2027-05-16": {
+			"type": "holiday",
+			"holiday": "kurban_ait",
+			"tentative": true
+		},
+		"2027-07-06": {
+			"type": "holiday",
+			"holiday": "capital_day"
+		},
+		"2027-08-30": {
+			"type": "holiday",
+			"holiday": "constitution_day"
+		},
+		"2027-10-25": {
+			"type": "holiday",
+			"holiday": "republic_day"
+		},
+		"2027-12-16": {
+			"type": "holiday",
+			"holiday": "independence_day"
+		}
+	}
+}

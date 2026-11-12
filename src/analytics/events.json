@@ -1,0 +1,169 @@
+{
+	"lang_change": {
+		"description": "Выбран язык в селекторе",
+		"params": {
+			"from": "язык до",
+			"to": "выбранный язык"
+		}
+	},
+	"theme_change": {
+		"description": "Переключена тема",
+		"params": {
+			"theme": "light | dark"
+		}
+	},
+	"view_change": {
+		"description": "Переключён вид календаря",
+		"params": {
+			"view": "year | month | lanes"
+		}
+	},
+	"year_change": {
+		"description": "Переключён год",
+		"params": {
+			"year": "выбранный год"
+		}
+	},
+	"mode_change": {
+		"description": "Переключён режим: просмотр или отпуск",
+		"params": {
+			"mode": "view | vacation"
+		}
+	},
+	"country_toggle": {
+		"description": "Страна добавлена в наложение или убрана",
+		"params": {
+			"country": "id страны",
+			"action": "add | remove",
+			"count": "сколько стран стало"
+		}
+	},
+	"country_limit_hit": {
+		"description": "Попытка выбрать больше стран, чем можно наложить",
+		"params": {
+			"country": "id страны"
+		}
+	},
+	"home_change": {
+		"description": "Изменена основная страна",
+		"params": {
+			"country": "id страны"
+		}
+	},
+	"day_open": {
+		"description": "Открыты подробности дня",
+		"params": {
+			"view": "вид, в котором нажали"
+		}
+	},
+	"transfer_open": {
+		"description": "Нажата кнопка «Показать» у переноса",
+		"params": {
+			"country": "id страны"
+		}
+	},
+	"vacation_select": {
+		"description": "Выбран диапазон отпуска",
+		"params": {
+			"days": "календарных дней",
+			"countries": "сколько стран в наложении"
+		}
+	},
+	"vacation_cancel": {
+		"description": "Выделение отпуска сброшено",
+		"params": {}
+	},
+	"navigator_budget_change": {
+		"description": "Изменён бюджет дней в навигаторе",
+		"params": {
+			"budget": "дней отпуска"
+		}
+	},
+	"navigator_apply": {
+		"description": "Выбрано окно, предложенное навигатором",
+		"params": {
+			"country": "id страны",
+			"rest": "дней отдыха",
+			"charged": "списано дней"
+		}
+	},
+	"magnet_hint_apply": {
+		"description": "Принята подсказка «можно выгоднее»",
+		"params": {
+			"country": "id страны",
+			"rest_gain": "дней отдыха прибавилось",
+			"charged_saved": "дней сэкономлено"
+		}
+	},
+	"settings_open": {
+		"description": "Открыты настройки",
+		"params": {}
+	},
+	"outbound_click": {
+		"description": "Переход по ссылке автора в футере",
+		"params": {
+			"target": "telegram_channel | telegram_dm | cv | projects"
+		}
+	},
+	"today_click": {
+		"description": "Нажата кнопка «Сегодня»",
+		"params": {
+			"view": "year | month | lanes"
+		}
+	},
+	"print_click": {
+		"description": "Нажата кнопка печати в шапке",
+		"params": {
+			"view": "вид календаря при печати"
+		}
+	},
+	"spoiler_toggle": {
+		"description": "Раскрыт или свёрнут спойлер: праздники страны или нормы по месяцам",
+		"params": {
+			"section": "holidays | monthly",
+			"country": "id страны, только для holidays",
+			"state": "open | close"
+		}
+	},
+	"sheet_toggle": {
+		"description": "На телефоне развёрнута, свёрнута или закрыта нижняя шторка",
+		"params": {
+			"state": "expand | collapse | close",
+			"via": "tap | drag | outside | keyboard"
+		}
+	},
+	"share_click": {
+		"description": "Нажата кнопка «Поделиться» у выбранного отпуска",
+		"params": {
+			"method": "native | clipboard",
+			"days": "календарных дней в отпуске",
+			"countries": "сколько стран выбрано"
+		}
+	},
+	"shared_link_open": {
+		"description": "Открыта ссылка на чужой отпуск",
+		"params": {
+			"days": "календарных дней в отпуске",
+			"countries": "сколько стран в ссылке"
+		}
+	},
+	"upcoming_open": {
+		"description": "Нажат праздник в списке ближайших",
+		"params": {
+			"country": "id первой страны с этим праздником",
+			"days_until": "через сколько дней праздник"
+		}
+	},
+	"month_swipe": {
+		"description": "Свайпом переключён месяц на телефоне",
+		"params": {
+			"direction": "next | prev"
+		}
+	},
+	"week_numbers_toggle": {
+		"description": "В настройках включены или выключены номера недель",
+		"params": {
+			"enabled": "yes | no"
+		}
+	}
+}

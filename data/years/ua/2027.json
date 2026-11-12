@@ -1,0 +1,77 @@
+{
+	"country": "ua",
+	"year": 2027,
+	"status": "forecast",
+	"statusNote": "Военное положение продлено до 29.01.2027; прогноз исходит из того, что его продлят дальше. Если отменят — праздники станут выходными, а с выходных начнут переносить.",
+	"sources": [
+		{
+			"title": "lb.ua: продление военного положения (26.10.2026)",
+			"url": "https://lb.ua/news/2026/10/26/776204_verhovna_rada_prodovzhila.html"
+		}
+	],
+	"regimes": [
+		{
+			"id": "martial_law",
+			"from": "2027-01-01",
+			"to": "2027-12-31",
+			"tentativeAfter": "2027-01-29"
+		}
+	],
+	"days": {
+		"2027-01-01": {
+			"type": "observance",
+			"holiday": "new_year",
+			"regime": "martial_law"
+		},
+		"2027-03-08": {
+			"type": "observance",
+			"holiday": "womens_day",
+			"regime": "martial_law"
+		},
+		"2027-05-01": {
+			"type": "observance",
+			"holiday": "labour_day",
+			"regime": "martial_law"
+		},
+		"2027-05-02": {
+			"type": "observance",
+			"holiday": "easter",
+			"regime": "martial_law"
+		},
+		"2027-05-08": {
+			"type": "observance",
+			"holiday": "remembrance_day",
+			"regime": "martial_law"
+		},
+		"2027-06-20": {
+			"type": "observance",
+			"holiday": "trinity",
+			"regime": "martial_law"
+		},
+		"2027-06-28": {
+			"type": "observance",
+			"holiday": "constitution_day",
+			"regime": "martial_law"
+		},
+		"2027-07-15": {
+			"type": "observance",
+			"holiday": "statehood_day",
+			"regime": "martial_law"
+		},
+		"2027-08-24": {
+			"type": "observance",
+			"holiday": "independence_day",
+			"regime": "martial_law"
+		},
+		"2027-10-01": {
+			"type": "observance",
+			"holiday": "defenders_day",
+			"regime": "martial_law"
+		},
+		"2027-12-25": {
+			"type": "observance",
+			"holiday": "christmas",
+			"regime": "martial_law"
+		}
+	}
+}

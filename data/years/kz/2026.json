@@ -1,0 +1,126 @@
+{
+	"country": "kz",
+	"year": 2026,
+	"status": "official",
+	"sources": [
+		{
+			"title": "xmlcalendar.ru",
+			"url": "https://xmlcalendar.ru/data/kz/2026/calendar.json"
+		}
+	],
+	"officialNorms": {
+		"workdays": 246,
+		"hours": {
+			"40": 1968
+		}
+	},
+	"days": {
+		"2026-01-01": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-02": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-07": {
+			"type": "holiday",
+			"holiday": "christmas"
+		},
+		"2026-03-08": {
+			"type": "holiday",
+			"holiday": "womens_day"
+		},
+		"2026-03-09": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-03-08"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-03-20": {
+			"type": "observance",
+			"holiday": "oraza_ait",
+			"tentative": true
+		},
+		"2026-03-21": {
+			"type": "holiday",
+			"holiday": "nauryz"
+		},
+		"2026-03-22": {
+			"type": "holiday",
+			"holiday": "nauryz"
+		},
+		"2026-03-23": {
+			"type": "holiday",
+			"holiday": "nauryz"
+		},
+		"2026-03-24": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-03-21"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-03-25": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-03-22"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-05-01": {
+			"type": "holiday",
+			"holiday": "unity_day"
+		},
+		"2026-05-07": {
+			"type": "holiday",
+			"holiday": "defender_day"
+		},
+		"2026-05-09": {
+			"type": "holiday",
+			"holiday": "victory_day"
+		},
+		"2026-05-11": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-05-09"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-05-27": {
+			"type": "holiday",
+			"holiday": "kurban_ait"
+		},
+		"2026-07-06": {
+			"type": "holiday",
+			"holiday": "capital_day"
+		},
+		"2026-08-30": {
+			"type": "holiday",
+			"holiday": "constitution_day"
+		},
+		"2026-08-31": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-08-30"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-10-25": {
+			"type": "holiday",
+			"holiday": "republic_day"
+		},
+		"2026-10-26": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-10-25"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-12-16": {
+			"type": "holiday",
+			"holiday": "independence_day"
+		}
+	}
+}

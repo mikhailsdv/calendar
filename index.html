@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="theme-color" content="#ffffff" />
+		<meta name="color-scheme" content="light dark" />
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<script>
+			// Тема до первой отрисовки и редирект с корня на язык. Ключ совпадает с STORAGE_KEY в src/config.ts
+			;(function () {
+				var root = location.pathname === '/'
+				try {
+					var s = JSON.parse(localStorage.getItem('workcalendar:settings:v1') || '{}') || {}
+					if (s.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark')
+					if (!root) return
+					var langs = ['ru', 'en', 'kk', 'hy', 'be', 'uk']
+					var alias = {kz: 'kk', am: 'hy', by: 'be', ua: 'uk'}
+					var lang = langs.indexOf(s.lang) >= 0 ? s.lang : ''
+					var list = navigator.languages || [navigator.language]
+					for (var i = 0; !lang && i < list.length; i++) {
+						var base = String(list[i] || '')
+							.toLowerCase()
+							.split(/[-_]/)[0]
+						base = alias[base] || base
+						if (langs.indexOf(base) >= 0) lang = base
+					}
+					location.replace('/' + (lang || 'ru') + '/')
+				} catch (e) {
+					if (root) location.replace('/ru/')
+				}
+			})()
+		</script>
+		<title>Производственный календарь</title>
+	</head>
+	<body>
+		<div id="app"></div>
+		<script prerender type="module" src="/src/main.tsx"></script>
+	</body>
+</html>

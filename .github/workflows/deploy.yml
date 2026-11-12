@@ -1,0 +1,74 @@
+name: Deploy
+
+# Ручной запуск из main и ежегодная пересборка в полночь 1 января по Москве,
+# чтобы /ru/ и остальные корневые страницы открывались на новом годе
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 21 31 12 *'
+
+# Деплой не отменяется на полпути: распаковщик должен довести подмену файлов до конца
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+        env:
+          HUSKY: '0'
+      - run: npm run typecheck
+      - run: npm test
+      - name: Build
+        run: npm run build
+        env:
+          VITE_YM_ID: ${{ vars.YM_ID }}
+      - run: npm run test:dist
+
+      # Заливаем один архив и распаковщик под случайным именем, потом дёргаем распаковщик по HTTP (см. ci/deploy.php)
+      - name: Upload and unpack
+        env:
+          FTP_HOST: ${{ secrets.FTP_HOST }}
+          FTP_USER: ${{ secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_TARGET_DIR: ${{ vars.FTP_TARGET_DIR }}
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: |
+          set -euo pipefail
+          DEPLOY_NAME="__deploy_$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')"
+          (cd dist && zip -qr "../$DEPLOY_NAME.zip" .)
+          cp ci/deploy.php "$DEPLOY_NAME.php"
+          curl -sS --fail --user "$FTP_USER:$FTP_PASSWORD" -T "{$DEPLOY_NAME.zip,$DEPLOY_NAME.php}" "ftp://$FTP_HOST/$FTP_TARGET_DIR"
+
+          # Распаковщик работает порциями по ~10 с (иначе упирается в таймауты хостинга), вызываем до финального статуса.
+          # Если сайт не отвечает 5 раз подряд — падаем сразу, а не висим до таймаута джобы
+          STATUS=''
+          FAILS=0
+          for i in $(seq 1 120); do
+            STATUS=$(curl -sSL --connect-timeout 10 --max-time 60 "$DEPLOY_URL/$DEPLOY_NAME.php?action=step" || true)
+            echo "$STATUS"
+            case "$STATUS" in
+              DEPLOY_OK*|DEPLOY_FAILED*) break ;;
+              DEPLOY_CONTINUE*) FAILS=0 ;;
+              *)
+                FAILS=$((FAILS + 1))
+                if [ "$FAILS" -ge 5 ]; then echo "Распаковщик не ответил $FAILS раз подряд, прерываем деплой"; break; fi
+                sleep 5
+                ;;
+            esac
+          done
+          case "$STATUS" in DEPLOY_OK*) ;; *) exit 1 ;; esac
+
+      - name: Smoke check
+        env:
+          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+        run: curl -sSf "$DEPLOY_URL/ru/" -o /dev/null

@@ -1,0 +1,113 @@
+{
+	"country": "by",
+	"year": 2026,
+	"status": "official",
+	"sources": [
+		{
+			"title": "xmlcalendar.ru",
+			"url": "https://xmlcalendar.ru/data/by/2026/calendar.json"
+		},
+		{
+			"title": "myfin.by: норма 2027 = 2050 ч (+26 ч к 2026)",
+			"url": "https://myfin.by/article/belarus/belorusy-v-2027-godu-budut-truditsa-bolse-norma-rabocego-vremeni-uvelicitsa-49170"
+		}
+	],
+	"officialNorms": {
+		"workdays": 254,
+		"hours": {
+			"40": 2024
+		}
+	},
+	"days": {
+		"2026-01-01": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-02": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-06": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-01-07": {
+			"type": "holiday",
+			"holiday": "christmas_orthodox"
+		},
+		"2026-03-08": {
+			"type": "holiday",
+			"holiday": "womens_day"
+		},
+		"2026-04-20": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-04-25"
+			},
+			"basis": "decree"
+		},
+		"2026-04-21": {
+			"type": "holiday",
+			"holiday": "radunitsa"
+		},
+		"2026-04-25": {
+			"type": "workday",
+			"transfer": {
+				"to": "2026-04-20"
+			},
+			"basis": "decree",
+			"shortBy": 1
+		},
+		"2026-04-30": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-05-01": {
+			"type": "holiday",
+			"holiday": "labour_day"
+		},
+		"2026-05-08": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-05-09": {
+			"type": "holiday",
+			"holiday": "victory_day"
+		},
+		"2026-07-02": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-07-03": {
+			"type": "holiday",
+			"holiday": "independence_day"
+		},
+		"2026-11-06": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-11-07": {
+			"type": "holiday",
+			"holiday": "october_revolution"
+		},
+		"2026-12-24": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-12-25": {
+			"type": "holiday",
+			"holiday": "christmas_catholic"
+		},
+		"2026-12-31": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		}
+	}
+}

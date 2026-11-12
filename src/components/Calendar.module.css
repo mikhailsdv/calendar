@@ -1,0 +1,547 @@
+.area {
+	position: relative;
+}
+
+/* ---------- year ---------- */
+.yearGrid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+@media (min-width: 640px) {
+	.yearGrid {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 16px;
+	}
+}
+
+@media (min-width: 1240px) {
+	.yearGrid {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+}
+
+.monthCard {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow: hidden;
+	background: var(--bg);
+}
+
+.monthHead {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+	padding: 6px 10px;
+	border: 0;
+	background: var(--season-bg);
+	color: var(--text);
+	font-weight: 600;
+	text-transform: capitalize;
+	text-align: left;
+}
+
+.monthHead svg {
+	width: 16px;
+	height: 16px;
+	color: var(--season-ink);
+}
+
+.winter {
+	--season-bg: var(--season-winter);
+	--season-ink: var(--season-winter-ink);
+}
+.spring {
+	--season-bg: var(--season-spring);
+	--season-ink: var(--season-spring-ink);
+}
+.summer {
+	--season-bg: var(--season-summer);
+	--season-ink: var(--season-summer-ink);
+}
+.autumn {
+	--season-bg: var(--season-autumn);
+	--season-ink: var(--season-autumn-ink);
+}
+
+.miniGrid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 2px;
+	padding: 6px;
+}
+
+.wd {
+	font-size: 11px;
+	line-height: 18px;
+	text-align: center;
+	color: var(--text-3);
+}
+
+.wdWeekend {
+	color: var(--off-text);
+	font-weight: 600;
+}
+
+/* ---------- day cell ---------- */
+.cell {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: stretch;
+	min-width: 0;
+	padding: 2px 2px 3px;
+	border: 0;
+	border-radius: 5px;
+	background-color: transparent;
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+	-webkit-tap-highlight-color: transparent;
+}
+
+.mini {
+	aspect-ratio: 1 / 1;
+	font-size: 12px;
+	line-height: 1;
+}
+
+.dayNum {
+	align-self: center;
+	min-width: 1.6em;
+	padding: 2px 0;
+	border-radius: 999px;
+}
+
+/* Красные дни: нерабочие в основной стране, праздники чуть ярче */
+.cell[data-off] {
+	background-color: var(--off-bg);
+}
+
+.cell[data-off] .dayNum {
+	color: var(--off-text);
+}
+
+.cell[data-home] {
+	background-color: var(--holiday-bg);
+}
+
+.cell[data-home] .dayNum {
+	font-weight: 700;
+}
+
+.cell.today {
+	z-index: 1;
+}
+
+.cell.today .dayNum {
+	position: relative;
+	isolation: isolate;
+	background: var(--accent);
+	color: var(--on-accent);
+	font-weight: 600;
+}
+
+/* Две мягкие волны расходятся от сегодняшней даты */
+.cell.today .dayNum::before,
+.cell.today .dayNum::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	z-index: -1;
+	border-radius: inherit;
+	background: var(--accent);
+	opacity: 0;
+	pointer-events: none;
+	animation: today-wave 3.2s cubic-bezier(0.2, 0.6, 0.35, 1) infinite;
+}
+
+.cell.today .dayNum::after {
+	animation-delay: 1.6s;
+}
+
+@keyframes today-wave {
+	0% {
+		transform: scale(1);
+		opacity: 0.3;
+	}
+	100% {
+		transform: scale(1.9);
+		opacity: 0;
+	}
+}
+
+.segs {
+	display: flex;
+	gap: 1px;
+	height: 4px;
+}
+
+.seg {
+	flex: 1;
+	min-width: 0;
+	border-radius: 1px;
+	background: var(--seg-empty);
+}
+
+.seg[data-k='weekend'] {
+	background: var(--seg-weekend);
+}
+.seg[data-k='holiday'] {
+	background: var(--c);
+}
+.seg[data-k='transfer'] {
+	background: repeating-linear-gradient(135deg, var(--c) 0 2px, transparent 2px 4px);
+	box-shadow: inset 0 0 0 1px var(--c);
+}
+.seg[data-k='workweekend'] {
+	background: transparent;
+	box-shadow: inset 0 0 0 1px var(--c);
+}
+.seg[data-k='short'] {
+	background: linear-gradient(90deg, var(--c) 0 35%, var(--seg-empty) 35%);
+}
+.seg[data-obs] {
+	box-shadow: inset 0 0 0 1px var(--c);
+}
+
+/* Наведение стоит до состояний выбора, иначе рамка выбранного дня появляется, только когда уведёшь мышь */
+@media (hover: hover) and (pointer: fine) {
+	.cell:hover {
+		box-shadow: inset 0 0 0 1px var(--border-strong);
+	}
+}
+
+/* Тон выделения ложится поверх красного фона, а не заменяет его */
+.cell[data-range] {
+	background-image: linear-gradient(var(--range), var(--range));
+	border-radius: 0;
+}
+.cell[data-range='preview'] {
+	background-image: linear-gradient(var(--range-preview), var(--range-preview));
+}
+.cell[data-edge] {
+	box-shadow: inset 0 0 0 2px var(--accent);
+	border-radius: 5px;
+}
+.cell[data-pair] {
+	box-shadow: inset 0 0 0 2px var(--text-2);
+}
+.cell[aria-pressed='true'] {
+	box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* ---------- month ---------- */
+.monthView {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+.band {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 14px;
+	background: var(--season-bg);
+	font-weight: 600;
+	font-size: 17px;
+	text-transform: capitalize;
+}
+
+.band svg {
+	width: 22px;
+	height: 22px;
+	color: var(--season-ink);
+}
+
+.band small {
+	margin-left: auto;
+	font-weight: 500;
+	font-size: 13px;
+	color: var(--season-ink);
+	text-transform: none;
+}
+
+.bigGrid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 4px;
+	padding: 8px;
+}
+
+/* Колонка номеров недель слева, по ширине числа */
+.withWeeks {
+	grid-template-columns: auto repeat(7, minmax(0, 1fr));
+}
+
+.weekNum {
+	align-self: center;
+	min-width: 1.6em;
+	font-size: 11px;
+	text-align: center;
+	color: var(--text-3);
+	font-variant-numeric: tabular-nums;
+}
+
+/* На телефоне ячейки месяца квадратные, с планшета — выше, чтобы влезли названия праздников */
+.big {
+	aspect-ratio: 1 / 1;
+	padding: 4px;
+	font-size: 14px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	align-items: flex-start;
+	text-align: left;
+}
+
+.big[data-off] {
+	border-color: var(--off-border);
+}
+
+.big .dayNum {
+	align-self: flex-start;
+	padding: 1px 5px;
+}
+
+.big .segs {
+	align-self: stretch;
+	height: 6px;
+	gap: 2px;
+}
+
+.big .seg {
+	border-radius: 2px;
+}
+
+.label {
+	display: none;
+	width: 100%;
+	margin: 2px 0;
+	font-size: 11px;
+	line-height: 1.25;
+	color: var(--text-2);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+	.bigGrid {
+		gap: 3px;
+		padding: 6px;
+	}
+}
+
+@media (min-width: 768px) {
+	.big {
+		aspect-ratio: auto;
+		min-height: 88px;
+		padding: 6px;
+		font-size: 15px;
+	}
+	.big .dayNum {
+		padding: 2px 6px;
+	}
+	.label {
+		display: block;
+	}
+}
+
+/* ---------- lanes ---------- */
+.lanesWrap {
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow: hidden;
+}
+
+.lanesScroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	padding: 8px 8px 10px;
+}
+
+.lanes {
+	display: grid;
+	grid-template-columns: 56px repeat(var(--days), minmax(26px, 1fr));
+	gap: 3px;
+	align-items: center;
+	min-width: max-content;
+}
+
+.laneHead {
+	font-size: 11px;
+	line-height: 1.2;
+	text-align: center;
+	color: var(--text-3);
+	font-variant-numeric: tabular-nums;
+}
+
+.laneHead b {
+	display: block;
+	font-size: 13px;
+	color: var(--text);
+	font-weight: 600;
+}
+
+.laneHeadWeekend b {
+	color: var(--off-text);
+}
+
+.laneLabel {
+	position: sticky;
+	left: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding-right: 4px;
+	background: var(--bg);
+	font-size: 13px;
+	font-weight: 600;
+}
+
+.lane {
+	height: 30px;
+	padding: 0;
+	border: 0;
+	border-radius: 5px;
+	background: var(--seg-empty);
+}
+
+.lane[data-k='weekend'] {
+	background: var(--seg-weekend);
+	opacity: 0.55;
+}
+.lane[data-k='holiday'] {
+	background: var(--c);
+}
+.lane[data-k='transfer'] {
+	background: repeating-linear-gradient(135deg, var(--c) 0 3px, transparent 3px 6px);
+	box-shadow: inset 0 0 0 1.5px var(--c);
+}
+.lane[data-k='workweekend'] {
+	background: var(--bg);
+	box-shadow: inset 0 0 0 2px var(--c);
+}
+.lane[data-k='short'] {
+	background: linear-gradient(180deg, var(--c) 0 30%, var(--seg-empty) 30%);
+}
+.lane[data-obs] {
+	box-shadow: inset 0 0 0 2px var(--c);
+}
+.lane[data-range] {
+	outline: 2px solid var(--accent);
+	outline-offset: -2px;
+}
+.lane[data-range='preview'] {
+	outline-color: var(--range);
+}
+.lane[aria-pressed='true'],
+.lane[data-pair] {
+	outline: 2px solid var(--text);
+	outline-offset: 1px;
+}
+
+.capacity {
+	font-size: 12px;
+	text-align: center;
+	color: var(--text-2);
+	font-variant-numeric: tabular-nums;
+}
+
+.capacityNone {
+	color: var(--c-am);
+	font-weight: 700;
+}
+
+/* ---------- transfer arrows ---------- */
+.arrows {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	overflow: visible;
+}
+
+/* ---------- legend ---------- */
+.legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 16px;
+	margin-top: 12px;
+	font-size: 13px;
+	color: var(--text-2);
+}
+
+.legend li {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	list-style: none;
+}
+
+.legend ul {
+	display: contents;
+}
+
+.legendSwatch {
+	display: inline-flex;
+	width: 22px;
+	height: 8px;
+}
+
+.legendSwatch .seg {
+	height: 8px;
+}
+
+/* Печать: год помещается на один лист A4, у месяца видны названия праздников, дорожки без прокрутки */
+@media print {
+	.yearGrid {
+		gap: 8px;
+	}
+	.monthCard,
+	.monthView,
+	.lanesWrap,
+	.legend {
+		break-inside: avoid;
+	}
+	.mini {
+		aspect-ratio: auto;
+		height: 22px;
+	}
+	.cell.today .dayNum {
+		background: none;
+		color: var(--text);
+	}
+	.cell.today[data-off] .dayNum {
+		color: var(--off-text);
+	}
+	.big {
+		aspect-ratio: auto;
+		min-height: 64px;
+	}
+	.label {
+		display: block;
+	}
+	.lanesScroll {
+		overflow: visible;
+	}
+	.lanes {
+		grid-template-columns: 40px repeat(var(--days), minmax(0, 1fr));
+		gap: 2px;
+		min-width: 0;
+	}
+	.lane {
+		height: 20px;
+	}
+	.laneHead {
+		font-size: 8px;
+	}
+	.laneHead b {
+		font-size: 10px;
+	}
+}

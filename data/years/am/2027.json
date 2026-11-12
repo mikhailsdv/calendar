@@ -1,0 +1,110 @@
+{
+	"country": "am",
+	"year": 2027,
+	"status": "forecast",
+	"statusNote": "Праздники — по закону. Переносы рабочих дней Правительство на 2027 ещё не объявило. Сокращённые дни посчитаны по правилу.",
+	"sources": [
+		{
+			"title": "Закон РА ЗР-200 «О праздниках и памятных днях»",
+			"url": "https://base.spinform.ru/show_doc.fwx?rgn=28604"
+		}
+	],
+	"days": {
+		"2027-01-01": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2027-01-02": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2027-01-05": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-01-06": {
+			"type": "holiday",
+			"holiday": "christmas"
+		},
+		"2027-01-26": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-01-27": {
+			"type": "holiday",
+			"holiday": "fallen_defenders_day"
+		},
+		"2027-01-28": {
+			"type": "holiday",
+			"holiday": "army_day"
+		},
+		"2027-03-08": {
+			"type": "holiday",
+			"holiday": "womens_day"
+		},
+		"2027-04-23": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-04-24": {
+			"type": "holiday",
+			"holiday": "genocide_remembrance"
+		},
+		"2027-04-25": {
+			"type": "observance",
+			"holiday": "citizen_day",
+			"note": "1 мая 2027 — суббота, поэтому День гражданина в последнее воскресенье апреля"
+		},
+		"2027-04-30": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-05-01": {
+			"type": "holiday",
+			"holiday": "labour_day"
+		},
+		"2027-05-09": {
+			"type": "holiday",
+			"holiday": "victory_peace_day"
+		},
+		"2027-05-27": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-05-28": {
+			"type": "holiday",
+			"holiday": "republic_day"
+		},
+		"2027-07-05": {
+			"type": "holiday",
+			"holiday": "constitution_day"
+		},
+		"2027-09-20": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-09-21": {
+			"type": "holiday",
+			"holiday": "independence_day"
+		},
+		"2027-12-07": {
+			"type": "observance",
+			"holiday": "earthquake_memorial"
+		},
+		"2027-12-30": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-12-31": {
+			"type": "holiday",
+			"holiday": "new_year"
+		}
+	}
+}

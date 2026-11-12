@@ -1,0 +1,50 @@
+# Статический сайт: пререндеренные страницы лежат в каталогах с index.html, rewrite для SPA не нужен.
+# Всё обёрнуто в <IfModule>, чтобы сайт работал, даже если какого-то модуля на хостинге нет.
+
+Options -Indexes
+DirectoryIndex index.html
+AddDefaultCharset utf-8
+ErrorDocument 404 /404.html
+
+<IfModule mod_mime.c>
+	AddType application/manifest+json .webmanifest
+	AddType image/svg+xml .svg
+</IfModule>
+
+# https и домен без www
+<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteCond %{HTTPS} off
+	RewriteCond %{HTTP:X-Forwarded-Proto} !https
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+	RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+	RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+	# Временные файлы деплоя закрыты снаружи, кроме самого распаковщика
+	RewriteRule ^__deploy_[0-9a-f]+/ - [F,L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml application/xml application/javascript application/json application/manifest+json image/svg+xml
+</IfModule>
+
+<IfModule mod_headers.c>
+	Header always set X-Content-Type-Options "nosniff"
+	Header always set Referrer-Policy "strict-origin-when-cross-origin"
+	Header always set X-Frame-Options "SAMEORIGIN"
+
+	# HTML, sitemap и robots всегда перепроверяются, чтобы новые данные появлялись сразу
+	<FilesMatch "\.(html|xml|txt|webmanifest)$">
+		Header set Cache-Control "no-cache"
+	</FilesMatch>
+	# Картинки и иконки без хеша в имени — неделя
+	<FilesMatch "\.(png|svg|ico)$">
+		Header set Cache-Control "public, max-age=604800"
+	</FilesMatch>
+</IfModule>
+
+# Файлы в /assets/ с хешем в имени не меняются никогда
+<IfModule mod_headers.c>
+	<If "%{REQUEST_URI} =~ m#^/assets/#">
+		Header set Cache-Control "public, max-age=31536000, immutable"
+	</If>
+</IfModule>

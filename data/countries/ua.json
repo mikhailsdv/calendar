@@ -1,0 +1,225 @@
+{
+	"id": "ua",
+	"iso": "UA",
+	"name": {
+		"ru": "Украина",
+		"en": "Ukraine",
+		"kk": "Украина",
+		"hy": "Ուկրաինա",
+		"be": "Украіна",
+		"uk": "Україна"
+	},
+	"locale": "uk-UA",
+	"timezone": "Europe/Kyiv",
+	"seasons": "meteo-north",
+	"week": {
+		"start": 1,
+		"weekend": [6, 7]
+	},
+	"workTime": {
+		"weekHours": [40, 36, 24],
+		"hoursPerDay": {
+			"40": 8,
+			"36": 7.2,
+			"24": 4.8
+		}
+	},
+	"rules": {
+		"weekendHoliday": "next-workday",
+		"weekendHolidayNote": "КЗпП ст. 67: праздник на выходном → следующий рабочий день. На время военного положения не действует.",
+		"decreeTransfers": true,
+		"preHolidayShortening": {
+			"hours": 1
+		}
+	},
+	"leave": {
+		"unit": "calendar",
+		"minDays": 24,
+		"notCounted": ["holiday"],
+		"note": "В мирное время праздники в отпуск не входят. Во время военного положения праздники — рабочие дни и списываются из отпуска."
+	},
+	"regimes": {
+		"martial_law": {
+			"name": {
+				"ru": "Военное положение",
+				"en": "Martial law",
+				"kk": "Әскери жағдай",
+				"hy": "Ռազմական դրություն",
+				"be": "Ваеннае становішча",
+				"uk": "Воєнний стан"
+			},
+			"from": "2022-02-24",
+			"until": "2027-01-29",
+			"untilNote": "продлевается каждые 90 дней",
+			"basis": "Закон № 2136-IX, ч. 6 ст. 6",
+			"effects": {
+				"holidaysOff": false,
+				"weekendHoliday": "none",
+				"preHolidayShortening": null,
+				"leaveNotCounted": []
+			}
+		}
+	},
+	"holidays": {
+		"new_year": {
+			"name": {
+				"ru": "Новый год",
+				"en": "New Year",
+				"kk": "Жаңа жыл",
+				"hy": "Նոր տարի",
+				"be": "Новы год",
+				"uk": "Новий рік"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["01-01"]
+			}
+		},
+		"womens_day": {
+			"name": {
+				"ru": "Международный женский день",
+				"en": "International Women's Day",
+				"kk": "Халықаралық әйелдер күні",
+				"hy": "Կանանց միջազգային օր",
+				"be": "Міжнародны жаночы дзень",
+				"uk": "Міжнародний жіночий день"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["03-08"]
+			}
+		},
+		"easter": {
+			"name": {
+				"ru": "Пасха",
+				"en": "Easter",
+				"kk": "Пасха",
+				"hy": "Զատիկ",
+				"be": "Вялікдзень",
+				"uk": "Великдень"
+			},
+			"kind": "religious",
+			"rule": {
+				"easter": "orthodox",
+				"offset": 0
+			}
+		},
+		"labour_day": {
+			"name": {
+				"ru": "День труда",
+				"en": "Labour Day",
+				"kk": "Еңбек күні",
+				"hy": "Աշխատանքի օր",
+				"be": "Дзень працы",
+				"uk": "День праці"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["05-01"]
+			}
+		},
+		"remembrance_day": {
+			"name": {
+				"ru": "День памяти и победы",
+				"en": "Day of Remembrance and Victory",
+				"kk": "Еске алу және жеңіс күні",
+				"hy": "Հիշատակի և հաղթանակի օր",
+				"be": "Дзень памяці і перамогі",
+				"uk": "День пам'яті та перемоги"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["05-08"]
+			},
+			"validFrom": "2023-05-29"
+		},
+		"trinity": {
+			"name": {
+				"ru": "Троица",
+				"en": "Trinity",
+				"kk": "Үштік мейрамы",
+				"hy": "Սուրբ Երրորդություն",
+				"be": "Тройца",
+				"uk": "Трійця"
+			},
+			"kind": "religious",
+			"rule": {
+				"easter": "orthodox",
+				"offset": 49
+			}
+		},
+		"constitution_day": {
+			"name": {
+				"ru": "День Конституции",
+				"en": "Constitution Day",
+				"kk": "Конституция күні",
+				"hy": "Սահմանադրության օր",
+				"be": "Дзень Канстытуцыі",
+				"uk": "День Конституції"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["06-28"]
+			}
+		},
+		"statehood_day": {
+			"name": {
+				"ru": "День Государственности",
+				"en": "Statehood Day",
+				"kk": "Мемлекеттілік күні",
+				"hy": "Պետականության օր",
+				"be": "Дзень дзяржаўнасці",
+				"uk": "День Державності"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["07-15"]
+			},
+			"validFrom": "2023-07-15"
+		},
+		"independence_day": {
+			"name": {
+				"ru": "День Независимости",
+				"en": "Independence Day",
+				"kk": "Тәуелсіздік күні",
+				"hy": "Անկախության օր",
+				"be": "Дзень Незалежнасці",
+				"uk": "День Незалежності"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["08-24"]
+			}
+		},
+		"defenders_day": {
+			"name": {
+				"ru": "День защитников и защитниц",
+				"en": "Defenders Day",
+				"kk": "Қорғаушылар күні",
+				"hy": "Պաշտպանների օր",
+				"be": "Дзень абаронцаў і абаронніц",
+				"uk": "День захисників і захисниць"
+			},
+			"kind": "public",
+			"rule": {
+				"fixed": ["10-01"]
+			},
+			"validFrom": "2023-10-01"
+		},
+		"christmas": {
+			"name": {
+				"ru": "Рождество Христово",
+				"en": "Christmas",
+				"kk": "Рождество",
+				"hy": "Սուրբ Ծնունդ",
+				"be": "Нараджэнне Хрыстова",
+				"uk": "Різдво Христове"
+			},
+			"kind": "religious",
+			"rule": {
+				"fixed": ["12-25"]
+			},
+			"validFrom": "2023-07-28"
+		}
+	}
+}

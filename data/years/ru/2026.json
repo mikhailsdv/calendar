@@ -1,0 +1,129 @@
+{
+	"country": "ru",
+	"year": 2026,
+	"status": "official",
+	"sources": [
+		{
+			"title": "КонсультантПлюс: производственный календарь 2026",
+			"url": "https://www.consultant.ru/law/ref/calendar/proizvodstvennye/2026/"
+		},
+		{
+			"title": "xmlcalendar.ru",
+			"url": "https://xmlcalendar.ru/data/ru/2026/calendar.json"
+		}
+	],
+	"officialNorms": {
+		"workdays": 247,
+		"hours": {
+			"40": 1972,
+			"36": 1774.4,
+			"24": 1181.6
+		}
+	},
+	"days": {
+		"2026-01-01": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-02": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-03": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-04": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-05": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-06": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-07": {
+			"type": "holiday",
+			"holiday": "christmas"
+		},
+		"2026-01-08": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2026-01-09": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-01-03"
+			},
+			"basis": "decree"
+		},
+		"2026-02-23": {
+			"type": "holiday",
+			"holiday": "defender_day"
+		},
+		"2026-03-08": {
+			"type": "holiday",
+			"holiday": "womens_day"
+		},
+		"2026-03-09": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-03-08"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-04-30": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-05-01": {
+			"type": "holiday",
+			"holiday": "labour_day"
+		},
+		"2026-05-08": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-05-09": {
+			"type": "holiday",
+			"holiday": "victory_day"
+		},
+		"2026-05-11": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-05-09"
+			},
+			"basis": "weekend-holiday-rule"
+		},
+		"2026-06-11": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-06-12": {
+			"type": "holiday",
+			"holiday": "russia_day"
+		},
+		"2026-11-03": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2026-11-04": {
+			"type": "holiday",
+			"holiday": "unity_day"
+		},
+		"2026-12-31": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2026-01-04"
+			},
+			"basis": "decree"
+		}
+	}
+}

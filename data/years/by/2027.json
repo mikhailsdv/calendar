@@ -1,0 +1,102 @@
+{
+	"country": "by",
+	"year": 2027,
+	"status": "official",
+	"sources": [
+		{
+			"title": "Постановление Совмина № 499 от 03.10.2026 (перенос 10.05 → 08.05)",
+			"url": "https://etalonline.by/novosti/korotko-o-vazhnom/perenos-rabochikh-dney-2027/"
+		},
+		{
+			"title": "Постановление Минтруда № 81 от 06.10.2026 (норма 2050 ч)",
+			"url": "https://myfin.by/article/belarus/belorusy-v-2027-godu-budut-truditsa-bolse-norma-rabocego-vremeni-uvelicitsa-49170"
+		}
+	],
+	"officialNorms": {
+		"hours": {
+			"40": 2050
+		}
+	},
+	"days": {
+		"2027-01-01": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2027-01-02": {
+			"type": "holiday",
+			"holiday": "new_year"
+		},
+		"2027-01-06": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-01-07": {
+			"type": "holiday",
+			"holiday": "christmas_orthodox"
+		},
+		"2027-03-08": {
+			"type": "holiday",
+			"holiday": "womens_day"
+		},
+		"2027-04-30": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-05-01": {
+			"type": "holiday",
+			"holiday": "labour_day"
+		},
+		"2027-05-08": {
+			"type": "workday",
+			"transfer": {
+				"to": "2027-05-10"
+			},
+			"basis": "decree",
+			"shortBy": 1
+		},
+		"2027-05-09": {
+			"type": "holiday",
+			"holiday": "victory_day"
+		},
+		"2027-05-10": {
+			"type": "dayoff",
+			"transfer": {
+				"from": "2027-05-08"
+			},
+			"basis": "decree"
+		},
+		"2027-05-11": {
+			"type": "holiday",
+			"holiday": "radunitsa"
+		},
+		"2027-07-02": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-07-03": {
+			"type": "holiday",
+			"holiday": "independence_day"
+		},
+		"2027-11-07": {
+			"type": "holiday",
+			"holiday": "october_revolution"
+		},
+		"2027-12-24": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		},
+		"2027-12-25": {
+			"type": "holiday",
+			"holiday": "christmas_catholic"
+		},
+		"2027-12-31": {
+			"type": "workday",
+			"shortBy": 1,
+			"reason": "pre-holiday"
+		}
+	}
+}

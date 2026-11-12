@@ -95,14 +95,18 @@ GitHub Actions собирает сайт, заливает один zip-архи
 Workflow `.github/workflows/deploy.yml` запускается вручную из `main` и сам пересобирает сайт 1 января,
 чтобы корневые страницы открывались на новом году. Для него в настройках репозитория нужны:
 
-| Где       | Имя              | Пример                                                   |
-| --------- | ---------------- | -------------------------------------------------------- |
-| Secrets   | `FTP_HOST`       | `ftp.example.com`                                        |
-| Secrets   | `FTP_USER`       |                                                          |
-| Secrets   | `FTP_PASSWORD`   |                                                          |
-| Variables | `FTP_TARGET_DIR` | `httpdocs/` (со слешем на конце)                         |
-| Variables | `DEPLOY_URL`     | `https://calendar.mishasaidov.com`                       |
-| Variables | `YM_ID`          | `114210612` — ID счётчика Яндекс Метрики (необязательно) |
+| Где     | Имя              | Пример                                     |
+| ------- | ---------------- | ------------------------------------------ |
+| Secrets | `FTP_HOST`       | `ftp.example.com`                          |
+| Secrets | `FTP_USER`       |                                            |
+| Secrets | `FTP_PASSWORD`   |                                            |
+| Secrets | `FTP_TARGET_DIR` | `httpdocs/` (со слешем на конце)           |
+| Secrets | `DEPLOY_URL`     | `https://calendar.mishasaidov.com`         |
+| Secrets | `YM_ID`          | ID счётчика Яндекс Метрики (необязательно) |
+
+Все значения — секреты: в публичном репозитории логи Actions видны всем, а обычные переменные в них
+печатаются открытым текстом. Если сайт лежит прямо в корне FTP, секрет `FTP_TARGET_DIR` не создавайте:
+пустое значение GitHub не сохранит, а отсутствующий секрет и так подставится пустой строкой.
 
 ## Аналитика
 
@@ -112,7 +116,7 @@ Workflow `.github/workflows/deploy.yml` запускается вручную и
 и не влияет на её скорость, а визит и цели до этого копятся в очереди. Для посетителей без JavaScript
 в каждую страницу добавляется пиксель `<noscript>`.
 
-Проверить локально: `VITE_YM_ID=114210612 npm run build && npm run preview`.
+Проверить локально: `VITE_YM_ID=<ID счётчика> npm run build && npm run preview`.
 Все цели с описанием параметров перечислены в [`src/analytics/events.json`](src/analytics/events.json).
 Готовый список для настройки целей в Метрике — [`docs/metrika-goals.md`](docs/metrika-goals.md), он собирается командой `npm run goals`.
 

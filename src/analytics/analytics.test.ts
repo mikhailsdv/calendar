@@ -59,7 +59,7 @@ describe('analytics', () => {
 	})
 
 	it('initializes the counter with the settings from Metrika and loads tag.js lazily', () => {
-		vi.stubEnv('VITE_YM_ID', '114210612')
+		vi.stubEnv('VITE_YM_ID', '87654321')
 		const ym = vi.fn()
 		const appendChild = vi.fn()
 		const script: Record<string, unknown> = {}
@@ -72,7 +72,7 @@ describe('analytics', () => {
 		})
 		vi.stubGlobal('location', {href: 'https://calendar.mishasaidov.com/ru/'})
 		initMetrika()
-		expect(ym).toHaveBeenCalledWith(114210612, 'init', {
+		expect(ym).toHaveBeenCalledWith(87654321, 'init', {
 			ssr: true,
 			webvisor: true,
 			clickmap: true,
@@ -82,7 +82,7 @@ describe('analytics', () => {
 			accurateTrackBounce: true,
 			trackLinks: true,
 		})
-		expect(script.src).toBe('https://mc.yandex.ru/metrika/tag.js?id=114210612')
+		expect(script.src).toBe('https://mc.yandex.ru/metrika/tag.js?id=87654321')
 		expect(appendChild).toHaveBeenCalledWith(script)
 	})
 

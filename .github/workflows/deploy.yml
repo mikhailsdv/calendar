@@ -31,7 +31,7 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          VITE_YM_ID: ${{ vars.YM_ID }}
+          VITE_YM_ID: ${{ secrets.YM_ID }}
       - run: npm run test:dist
 
       # Заливаем один архив и распаковщик под случайным именем, потом дёргаем распаковщик по HTTP (см. ci/deploy.php)
@@ -40,8 +40,8 @@ jobs:
           FTP_HOST: ${{ secrets.FTP_HOST }}
           FTP_USER: ${{ secrets.FTP_USER }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_TARGET_DIR: ${{ vars.FTP_TARGET_DIR }}
-          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          FTP_TARGET_DIR: ${{ secrets.FTP_TARGET_DIR }}
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
         run: |
           set -euo pipefail
           DEPLOY_NAME="__deploy_$(head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')"
@@ -70,5 +70,5 @@ jobs:
 
       - name: Smoke check
         env:
-          DEPLOY_URL: ${{ vars.DEPLOY_URL }}
+          DEPLOY_URL: ${{ secrets.DEPLOY_URL }}
         run: curl -sSf "$DEPLOY_URL/ru/" -o /dev/null

@@ -16,16 +16,17 @@ const CalendarApp = ({
 	i18n,
 	init,
 	routeYear,
-}: Omit<AppProps, 'route'> & {routeYear: number | null}) => {
+	routeCountry,
+}: Omit<AppProps, 'route'> & {routeYear: number | null; routeCountry: string | null}) => {
 	const store = useMemo(
-		() => createStore({lang: i18n.lang, year: init.year, years: init.years}),
+		() => createStore({lang: i18n.lang, year: init.year, years: init.years, country: routeCountry}),
 		// Стор создаётся один раз на страницу
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 		[]
 	)
 	return (
 		<StoreContext.Provider value={store}>
-			<CalendarPage routeYear={routeYear} />
+			<CalendarPage routeYear={routeYear} routeCountry={routeCountry} />
 		</StoreContext.Provider>
 	)
 }
@@ -37,7 +38,7 @@ export const App = ({route, i18n, init}: AppProps) => (
 		) : route.kind === 'notFound' ? (
 			<NotFoundPage />
 		) : (
-			<CalendarApp i18n={i18n} init={init} routeYear={route.year} />
+			<CalendarApp i18n={i18n} init={init} routeYear={route.year} routeCountry={route.country} />
 		)}
 	</I18nContext.Provider>
 )

@@ -1,3 +1,4 @@
+import {countryPages} from '../app/routes'
 import type {Country, YearData} from './types'
 
 const countryModules = import.meta.glob<Country>('../../data/countries/*.json', {
@@ -43,3 +44,9 @@ export const loadYearForCountries = async (countryIds: string[], year: number) =
 	)
 	return Object.fromEntries(entries.filter(([, data]) => data)) as Record<string, YearData>
 }
+
+/** Страницы стран (/ru/kz/2026/): языки из профиля, годы из данных */
+export const COUNTRY_PAGES = countryPages(
+	COUNTRY_IDS.map(id => COUNTRIES[id]!),
+	id => YEARS.filter(year => hasYear(id, year))
+)

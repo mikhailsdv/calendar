@@ -64,12 +64,11 @@ describe('persist', () => {
 describe('store', () => {
 	const store = () => createStore({lang: 'kk', year: 2027, years: {}})
 
-	it('puts the language country first', () => {
-		expect(defaultSettings('kk').countries[0]).toBe('kz')
-		expect(defaultSettings('en').countries[0]).toBe('ru')
-		expect(defaultSettings('ru').countries).toHaveLength(
-			Math.min(MAX_COUNTRIES, COUNTRY_IDS.length)
-		)
+	it('starts with the one country of the page language', () => {
+		expect(defaultSettings('kk').countries).toEqual(['kz'])
+		expect(defaultSettings('uk').countries).toEqual(['ua'])
+		expect(defaultSettings('en').countries).toEqual(['ru'])
+		expect(defaultSettings('ru').countries).toEqual(['ru'])
 	})
 
 	it(`limits the overlay to ${MAX_COUNTRIES} countries and keeps at least one`, () => {

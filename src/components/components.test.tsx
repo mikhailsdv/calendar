@@ -3,18 +3,34 @@ import {cleanup, fireEvent, render, within} from '@testing-library/preact'
 import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest'
 
 import {App} from '../app/App'
+import type * as DetectCountry from '../app/detectCountry'
 import {STORAGE_KEY} from '../config'
+import {COUNTRY_IDS} from '../data/loader'
 import {loadDict} from '../i18n'
 import type {YearCache} from '../state/store'
 import {allYears} from '../test/data'
 
+// Часовой пояс машины не должен влиять на тесты: «браузер» всегда в Москве
+vi.mock('../app/detectCountry', async importOriginal => ({
+	...(await importOriginal<typeof DetectCountry>()),
+	browserSignals: (lang: 'ru' | 'en') => ({timeZone: 'Europe/Moscow', languages: ['ru-RU'], lang}),
+}))
+
+/** Для тестов наложения: все страны уже выбраны и сохранены */
+const saveAllCountries = () =>
+	localStorage.setItem(STORAGE_KEY, JSON.stringify({countries: COUNTRY_IDS}))
+
 const years: YearCache = {}
 for (const y of allYears) years[y.country] = {...years[y.country], [y.year]: y}
 
-const renderApp = async (lang: 'ru' | 'en' = 'ru') => {
+const renderApp = async (lang: 'ru' | 'en' = 'ru', country: string | null = null) => {
 	const t = await loadDict(lang)
 	const result = render(
-		<App route={{kind: 'app', lang, year: 2027}} i18n={{lang, t}} init={{year: 2027, years}} />
+		<App
+			route={{kind: 'app', lang, year: 2027, country}}
+			i18n={{lang, t}}
+			init={{year: 2027, years}}
+		/>
 	)
 	await new Promise(r => setTimeout(r, 0))
 	return result
@@ -34,7 +50,34 @@ beforeEach(() => localStorage.clear())
 afterEach(() => cleanup())
 
 describe('calendar', () => {
+	it('selects only the detected country on the first visit', async () => {
+		const {getByRole} = await renderApp()
+		const chips = within(getByRole('group', {name: 'Страны'}))
+		const active = chips
+			.getAllByRole('button')
+			.filter(b => b.getAttribute('aria-pressed') === 'true')
+		expect(active.map(b => b.textContent)).toEqual(['Россия· основная'])
+		expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+	})
+
+	it('opens a country page with that country first, without saving it', async () => {
+		localStorage.setItem(STORAGE_KEY, JSON.stringify({countries: ['ru', 'by']}))
+		const {getByRole, container} = await renderApp('ru', 'kz')
+		const chips = within(getByRole('group', {name: 'Страны'}))
+		const active = chips
+			.getAllByRole('button')
+			.filter(b => b.getAttribute('aria-pressed') === 'true')
+		// Чипы идут в обычном порядке стран, основной стала страна из адреса
+		expect(active.map(b => b.dataset.c)).toEqual(['ru', 'kz', 'by'])
+		expect(chips.getByRole('button', {name: /Казахстан/}).textContent).toContain('основная')
+		expect(container.querySelector('h1')?.textContent).toBe(
+			'Производственный календарь Казахстана на 2027 год'
+		)
+		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries).toEqual(['ru', 'by'])
+	})
+
 	it('renders a year with one segment per country', async () => {
+		saveAllCountries()
 		const {container} = await renderApp()
 		expect(container.querySelectorAll('button[data-date]')).toHaveLength(365)
 		const segs = cell(container, '2027-05-10').querySelectorAll('i')
@@ -82,6 +125,7 @@ describe('calendar', () => {
 	})
 
 	it('toggles countries and keeps at least one', async () => {
+		saveAllCountries()
 		const {container, getByRole} = await renderApp()
 		const chip = within(getByRole('group', {name: 'Страны'})).getByRole('button', {name: /Армения/})
 		expect(chip.getAttribute('aria-pressed')).toBe('true')
@@ -114,6 +158,7 @@ describe('calendar', () => {
 	})
 
 	it('collapses holiday lists from the third country on', async () => {
+		saveAllCountries()
 		const {container, getByRole} = await renderApp()
 		const chips = within(getByRole('group', {name: 'Страны'}))
 		expect(holidayToggles(container).map(expanded)).toEqual([true, true, false, false, false])
@@ -126,6 +171,7 @@ describe('calendar', () => {
 	})
 
 	it('opens and closes a holiday list by its title', async () => {
+		saveAllCountries()
 		const {container} = await renderApp()
 		const body = (button: HTMLElement) =>
 			document.getElementById(button.getAttribute('aria-controls')!)!

@@ -2,12 +2,14 @@ import {effect} from '@preact/signals'
 import {useEffect, useRef} from 'preact/hooks'
 
 import {initMetrika, track} from '../analytics/metrika'
+import {browserSignals, detectCountry} from '../app/detectCountry'
 import {pathFor} from '../app/routes'
 import {readShared} from '../app/share'
-import {COUNTRY_IDS, YEARS} from '../data/loader'
+import {MAX_COUNTRIES} from '../config'
+import {COUNTRY_IDS, hasYear, YEARS} from '../data/loader'
 import {diffDays, monthOf, todayISO, yearOf} from '../domain/dates'
-import {useI18n} from '../i18n'
-import {calendarTitle} from '../seo/title'
+import {fmt, localized, useI18n} from '../i18n'
+import {calendarTitle, countryForm, countryTitle} from '../seo/title'
 import {loadSettings, saveSettings} from '../state/persist'
 import {useStore} from '../state/store'
 import {CalendarArea, Legend} from './CalendarViews'
@@ -16,7 +18,13 @@ import s from './Layout.module.css'
 import {Panel} from './Panel'
 import {CompareSection, HolidaysSection, RulesSection} from './Sections'
 
-export const CalendarPage = ({routeYear}: {routeYear: number | null}) => {
+export const CalendarPage = ({
+	routeYear,
+	routeCountry,
+}: {
+	routeYear: number | null
+	routeCountry: string | null
+}) => {
 	const store = useStore()
 	const {lang, t} = useI18n()
 	const initialYear = useRef(store.year.value).current
@@ -24,8 +32,19 @@ export const CalendarPage = ({routeYear}: {routeYear: number | null}) => {
 	// Всё, что зависит от браузера, применяется после гидрации, чтобы разметка совпала с пререндером
 	useEffect(() => {
 		const today = todayISO()
-		const saved = loadSettings(store.settings.value, COUNTRY_IDS)
-		store.settings.value = saved
+		// Первый вход: страна из адреса, иначе по часовому поясу и языку браузера.
+		// Если настройки уже сохранены, берём их, а страну из адреса ставим основной — без сохранения
+		const detected = routeCountry ?? detectCountry(browserSignals(lang))
+		const settings = loadSettings({...store.settings.value, countries: [detected]}, COUNTRY_IDS)
+		store.settings.value = routeCountry
+			? {
+					...settings,
+					countries: [routeCountry, ...settings.countries.filter(id => id !== routeCountry)].slice(
+						0,
+						MAX_COUNTRIES
+					),
+				}
+			: settings
 		store.today.value = today
 		const todayYear = yearOf(today)
 		if (routeYear == null && todayYear !== store.year.value && YEARS.includes(todayYear)) {
@@ -67,11 +86,17 @@ export const CalendarPage = ({routeYear}: {routeYear: number | null}) => {
 			document.documentElement.dataset.theme = store.settings.value.theme
 		})
 		// Адрес и заголовок вкладки следуют за выбранным годом
+		// Адрес, заголовок вкладки и h1 следуют за годом и основной страной. Страница страны
+		// переключается на страницу новой основной страны, а если её нет на этом языке — на общую
 		const stopUrl = effect(() => {
 			const year = store.year.value
+			const home = store.home.value
 			const yearPage = !(routeYear == null && year === initialYear)
-			document.title = calendarTitle(t, year, yearPage)
-			const path = yearPage ? pathFor(lang, year) : pathFor(lang)
+			const form = routeCountry && hasYear(home.id, year) ? countryForm(home, lang) : undefined
+			const country = form ? home.id : null
+			store.pageCountry.value = country
+			document.title = form ? countryTitle(t, form, year) : calendarTitle(t, year, yearPage)
+			const path = pathFor(lang, yearPage ? year : null, country)
 			if (location.pathname !== path)
 				history.replaceState(history.state, '', path + location.search)
 		})
@@ -81,8 +106,19 @@ export const CalendarPage = ({routeYear}: {routeYear: number | null}) => {
 		document.addEventListener('keydown', onKey)
 		// Печатаем всегда в светлой теме: тёмный фон на бумаге не нужен
 		const root = document.documentElement
-		const onBeforePrint = () => (root.dataset.theme = 'light')
-		const onAfterPrint = () => (root.dataset.theme = store.settings.value.theme)
+		// Заголовок документа браузер печатает вверху листа и берёт для имени PDF: только выбранные страны
+		let screenTitle = document.title
+		const onBeforePrint = () => {
+			root.dataset.theme = 'light'
+			screenTitle = document.title
+			const names = store.countries.value.map(c => c.pages[lang] ?? localized(c.name, lang))
+			const list = new Intl.ListFormat(lang, {type: 'conjunction'}).format(names)
+			document.title = fmt(t.header.h1Country, {country: list, year: store.year.value})
+		}
+		const onAfterPrint = () => {
+			root.dataset.theme = store.settings.value.theme
+			document.title = screenTitle
+		}
 		window.addEventListener('beforeprint', onBeforePrint)
 		window.addEventListener('afterprint', onAfterPrint)
 		initMetrika()
@@ -103,7 +139,7 @@ export const CalendarPage = ({routeYear}: {routeYear: number | null}) => {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [])
 
-	const hrefFor = hrefForLang(routeYear, store.year.value, initialYear)
+	const hrefFor = hrefForLang(routeYear, store.year.value, initialYear, store.pageCountry.value)
 
 	return (
 		<div class={s.page}>

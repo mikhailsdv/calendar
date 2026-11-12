@@ -2,6 +2,7 @@ import {batch, computed, signal} from '@preact/signals'
 import {createContext} from 'preact'
 import {useContext} from 'preact/hooks'
 
+import {COUNTRY_BY_LANG, FALLBACK_COUNTRY} from '../app/detectCountry'
 import {type Lang, MAX_COUNTRIES} from '../config'
 import {COUNTRIES, COUNTRY_IDS, hasYear, loadYear, YEARS} from '../data/loader'
 import type {YearData, YearLookup} from '../data/types'
@@ -16,24 +17,21 @@ export interface Range {
 	end: ISODate | null
 }
 
-/** Основная страна по языку интерфейса */
-const HOME_BY_LANG: Partial<Record<Lang, string>> = {kk: 'kz', hy: 'am', be: 'by', uk: 'ua'}
-
-export const defaultSettings = (lang: Lang): Settings => {
-	const home = HOME_BY_LANG[lang] ?? 'ru'
-	const countries = [home, ...COUNTRY_IDS.filter(id => id !== home)].slice(0, MAX_COUNTRIES)
-	return {
-		theme: 'light',
-		lang: null,
-		countries,
-		view: 'year',
-		weekStart: 'auto',
-		hoursNorm: 40,
-		showObservances: true,
-		showWeekNumbers: false,
-		budget: 5,
-	}
-}
+/**
+ * Настройки по умолчанию для языка: одна страна — та, на которую указывает язык страницы.
+ * Это же видит пререндер. На клиенте при первом входе страна уточняется по часовому поясу (CalendarPage)
+ */
+export const defaultSettings = (lang: Lang, country: string | null = null): Settings => ({
+	theme: 'light',
+	lang: null,
+	countries: [country ?? COUNTRY_BY_LANG[lang] ?? FALLBACK_COUNTRY],
+	view: 'year',
+	weekStart: 'auto',
+	hoursNorm: 40,
+	showObservances: true,
+	showWeekNumbers: false,
+	budget: 5,
+})
 
 export type YearCache = Record<string, Record<number, YearData>>
 
@@ -41,10 +39,14 @@ interface StoreInit {
 	lang: Lang
 	year: number
 	years: YearCache
+	/** Страна из адреса (/ru/kz/), если открыта страница страны */
+	country?: string | null
 }
 
-export const createStore = ({lang, year: initialYear, years}: StoreInit) => {
-	const settings = signal<Settings>(defaultSettings(lang))
+export const createStore = ({lang, year: initialYear, years, country = null}: StoreInit) => {
+	const settings = signal<Settings>(defaultSettings(lang, country))
+	/** Страна, чья страница сейчас открыта: от неё зависят адрес, title и h1. Null — общая страница */
+	const pageCountry = signal<string | null>(country)
 	const year = signal(initialYear)
 	const month = signal(1)
 	const mode = signal<Mode>('view')
@@ -203,6 +205,7 @@ export const createStore = ({lang, year: initialYear, years}: StoreInit) => {
 		settingsOpen,
 		limitHit,
 		navigatorCountry,
+		pageCountry,
 		countries,
 		home,
 		weekStart,

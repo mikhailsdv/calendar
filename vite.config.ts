@@ -1,37 +1,31 @@
-import {readdirSync} from 'node:fs'
-import {resolve} from 'node:path'
-
 import preact from '@preact/preset-vite'
 import {defineConfig, loadEnv, type Plugin} from 'vite'
 
-import {pathFor} from './src/app/routes'
-import {LANGS, SITE_ORIGIN} from './src/config'
+import {pageGroups} from './src/app/routes'
+import {SITE_ORIGIN} from './src/config'
+import {COUNTRY_PAGES, YEARS} from './src/data/nodeLoader'
 
-/** Годы, по которым есть данные хотя бы у одной страны */
-const dataYears = () => {
-	const root = resolve(import.meta.dirname, 'data/years')
-	const years = readdirSync(root).flatMap(country =>
-		readdirSync(resolve(root, country)).map(file => Number(file.replace('.json', '')))
-	)
-	return [...new Set(years)].filter(Boolean).sort((a, b) => a - b)
-}
-
-/** sitemap.xml со всеми языками и годами, связанными через hreflang */
+/**
+ * sitemap.xml: общие страницы на всех языках и страницы стран на языках из их белого списка.
+ * Языковые версии одной страницы связаны через hreflang
+ */
 const sitemap = (): Plugin => ({
 	name: 'workcalendar-sitemap',
 	apply: 'build',
 	generateBundle() {
 		const lastmod = new Date().toISOString().slice(0, 10)
-		const groups: (number | null)[] = [null, ...dataYears()]
-		const urls = groups.flatMap(year =>
-			LANGS.map(lang => {
-				const alternates = LANGS.map(
-					l =>
-						`<xhtml:link rel="alternate" hreflang="${l}" href="${SITE_ORIGIN}${pathFor(l, year)}"/>`
-				).join('')
-				return `<url><loc>${SITE_ORIGIN}${pathFor(lang, year)}</loc><lastmod>${lastmod}</lastmod>${alternates}</url>`
-			})
-		)
+		const urls = pageGroups(YEARS, COUNTRY_PAGES).flatMap(group => {
+			const alternates = group
+				.map(
+					page =>
+						`<xhtml:link rel="alternate" hreflang="${page.lang}" href="${SITE_ORIGIN}${page.path}"/>`
+				)
+				.join('')
+			return group.map(
+				page =>
+					`<url><loc>${SITE_ORIGIN}${page.path}</loc><lastmod>${lastmod}</lastmod>${alternates}</url>`
+			)
+		})
 		this.emitFile({
 			type: 'asset',
 			fileName: 'sitemap.xml',

@@ -10,9 +10,15 @@ const en: Dict = {
 		rootDescription:
 			'Working calendar of Russia, Kazakhstan, Belarus, Armenia and Ukraine: holidays, transfers, vacations.',
 		notFound: 'Page not found',
+		countryTitle: '{country} working calendar {year}: public holidays and transfers',
+		countryDescription:
+			'Public holidays, transferred days off, weekends and working hours of {country} in {year}. Vacation days counted by local rules, plus the best dates to take time off.',
 	},
 	header: {
 		h1: 'Working calendar {year}',
+		h1Country: '{country} working calendar {year}',
+		stats:
+			'{country}, {year}: {workdays} working days, {offdays} days off, {hours} working hours at {norm} h a week',
 		subtitle: 'Overlay up to {n} countries, see transferred days off and plan your vacation',
 		language: 'Language',
 		themeLight: 'Switch to light theme',

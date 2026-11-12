@@ -9,6 +9,10 @@
 		"be": "Расія",
 		"uk": "Росія"
 	},
+	"pages": {
+		"ru": "России",
+		"en": "Russia"
+	},
 	"locale": "ru-RU",
 	"timezone": "Europe/Moscow",
 	"seasons": "meteo-north",

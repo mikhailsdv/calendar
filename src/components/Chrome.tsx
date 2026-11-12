@@ -1,11 +1,13 @@
-import {useEffect, useRef, useState} from 'preact/hooks'
+import {useEffect, useMemo, useRef, useState} from 'preact/hooks'
 
 import {track} from '../analytics/metrika'
 import {pathFor} from '../app/routes'
 import {AUTHOR_LINKS, type Lang, LANG_NAMES, LANGS, MAX_COUNTRIES} from '../config'
 import {COUNTRIES, COUNTRY_IDS, YEARS} from '../data/loader'
+import {yearTotals} from '../domain/calendar'
 import {yearOf} from '../domain/dates'
 import {fmt, localized, useI18n} from '../i18n'
+import {countryForm} from '../seo/title'
 import {useStore} from '../state/store'
 import {Flag, LANG_FLAG} from './Flag'
 import {ChevronLeft, ChevronRight, MoonIcon, PrinterIcon, SettingsIcon, SunIcon} from './icons'
@@ -96,13 +98,48 @@ export const ThemeToggle = () => {
 	)
 }
 
+/** Цифры года основной страны под заголовком: рабочие и выходные дни, норма часов */
+const YearStats = () => {
+	const store = useStore()
+	const {t, lang} = useI18n()
+	const home = store.home.value
+	const year = store.year.value
+	const data = store.lookup.value(home.id, year)
+	const totals = useMemo(
+		() => (data ? yearTotals(home, data, year).total : null),
+		[home, data, year]
+	)
+	const number = useMemo(() => new Intl.NumberFormat(lang, {maximumFractionDigits: 1}), [lang])
+	if (!totals) return null
+	// У Армении есть только 40-часовая неделя: для неё показываем норму при 40 часах
+	const chosen = store.settings.value.hoursNorm
+	const norm = totals.hours[String(chosen)] != null ? chosen : 40
+	return (
+		<p class={s.stats}>
+			{fmt(t.header.stats, {
+				country: localized(home.name, lang),
+				year,
+				workdays: totals.workdays,
+				offdays: totals.offdays,
+				norm,
+				hours: number.format(totals.hours[String(norm)] ?? 0),
+			})}
+		</p>
+	)
+}
+
 export const Header = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 	const store = useStore()
-	const {t} = useI18n()
+	const {t, lang} = useI18n()
+	const year = store.year.value
+	const form = countryForm(COUNTRIES[store.pageCountry.value ?? ''], lang)
 	return (
 		<header class={s.header}>
-			<h1 class={s.title}>{fmt(t.header.h1, {year: store.year.value})}</h1>
+			<h1 class={s.title}>
+				{form ? fmt(t.header.h1Country, {country: form, year}) : fmt(t.header.h1, {year})}
+			</h1>
 			<p class={s.subtitle}>{fmt(t.header.subtitle, {n: MAX_COUNTRIES})}</p>
+			<YearStats />
 			<nav class={s.actions} aria-label={t.header.settings}>
 				<LangSwitcher hrefFor={hrefFor} />
 				<ThemeToggle />
@@ -439,6 +476,10 @@ export const Footer = () => {
 	)
 }
 
+/** Ссылка на ту же страницу на другом языке; страница страны — только если она есть на этом языке */
 export const hrefForLang =
-	(routeYear: number | null, year: number, initialYear: number) => (lang: Lang) =>
-		routeYear == null && year === initialYear ? pathFor(lang) : pathFor(lang, year)
+	(routeYear: number | null, year: number, initialYear: number, pageCountry: string | null) =>
+	(lang: Lang) => {
+		const country = countryForm(COUNTRIES[pageCountry ?? ''], lang) ? pageCountry : null
+		return pathFor(lang, routeYear == null && year === initialYear ? null : year, country)
+	}

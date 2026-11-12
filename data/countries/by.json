@@ -9,6 +9,11 @@
 		"be": "Беларусь",
 		"uk": "Білорусь"
 	},
+	"pages": {
+		"ru": "Беларуси",
+		"be": "Беларусі",
+		"en": "Belarus"
+	},
 	"locale": "ru-BY",
 	"timezone": "Europe/Minsk",
 	"seasons": "meteo-north",

@@ -9,6 +9,11 @@
 		"be": "Казахстан",
 		"uk": "Казахстан"
 	},
+	"pages": {
+		"ru": "Казахстана",
+		"kk": "Қазақстанның",
+		"en": "Kazakhstan"
+	},
 	"locale": "ru-KZ",
 	"timezone": "Asia/Almaty",
 	"seasons": "meteo-north",

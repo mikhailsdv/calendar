@@ -1,7 +1,8 @@
 import {pathFor, type Route} from '../app/routes'
 import {AUTHOR_LINKS, type Lang, LANGS, OG_LOCALES, SITE_ORIGIN} from '../config'
+import {COUNTRIES} from '../data/loader'
 import {type Dict, fmt} from '../i18n'
-import {calendarTitle} from './title'
+import {calendarTitle, countryForm, countryTitle} from './title'
 
 export interface HeadElement {
 	type: string
@@ -37,25 +38,36 @@ export const buildHead = (route: Route, t: Dict, year: number): Head => {
 	}
 
 	const routeYear = route.kind === 'app' ? route.year : null
-	const path = route.kind === 'root' ? '/' : pathFor(lang, routeYear)
+	const country = route.kind === 'app' && route.country ? COUNTRIES[route.country] : undefined
+	const form = countryForm(country, lang)
+	const path = route.kind === 'root' ? '/' : pathFor(lang, routeYear, country?.id)
 	const title =
 		route.kind === 'root'
 			? t.meta.titleCurrent
-			: calendarTitle(t, routeYear ?? year, routeYear != null)
+			: form
+				? countryTitle(t, form, routeYear ?? year)
+				: calendarTitle(t, routeYear ?? year, routeYear != null)
 	const description =
 		route.kind === 'root'
 			? t.meta.rootDescription
-			: fmt(t.meta.description, {year: routeYear ?? year})
+			: form
+				? fmt(t.meta.countryDescription, {country: form, year: routeYear ?? year})
+				: fmt(t.meta.description, {year: routeYear ?? year})
 	const image = url(`/og/${lang}.png`)
+	// Языковые версии: у страницы страны — только языки из её белого списка
+	const langs = country ? LANGS.filter(l => country.pages[l]) : LANGS
+	const defaultLang = langs.includes('ru') ? 'ru' : langs[0]!
 
 	const elements: HeadElement[] = [
 		meta('description', description),
 		link({rel: 'canonical', href: url(path)}),
-		...LANGS.map(l => link({rel: 'alternate', hreflang: l, href: url(pathFor(l, routeYear))})),
+		...langs.map(l =>
+			link({rel: 'alternate', hreflang: l, href: url(pathFor(l, routeYear, country?.id))})
+		),
 		link({
 			rel: 'alternate',
 			hreflang: 'x-default',
-			href: url(routeYear == null ? '/' : pathFor('ru', routeYear)),
+			href: url(!country && routeYear == null ? '/' : pathFor(defaultLang, routeYear, country?.id)),
 		}),
 		meta('og:type', 'website'),
 		meta('og:site_name', t.meta.siteName),
@@ -66,7 +78,7 @@ export const buildHead = (route: Route, t: Dict, year: number): Head => {
 		meta('og:image:width', '1200'),
 		meta('og:image:height', '630'),
 		meta('og:locale', OG_LOCALES[lang]),
-		...LANGS.filter(l => l !== lang).map(l => meta('og:locale:alternate', OG_LOCALES[l])),
+		...langs.filter(l => l !== lang).map(l => meta('og:locale:alternate', OG_LOCALES[l])),
 		meta('twitter:card', 'summary_large_image'),
 		meta('twitter:title', title),
 		meta('twitter:description', description),

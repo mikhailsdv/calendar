@@ -39,6 +39,11 @@ export interface Country {
 	id: string
 	iso: string
 	name: LocalizedText
+	/**
+	 * Языки, на которых у страны есть свои страницы (/ru/kz/2026/), и форма названия для их заголовков:
+	 * «Производственный календарь Казахстана», «Kazakhstan working calendar»
+	 */
+	pages: Partial<Record<Lang, string>>
 	locale: string
 	timezone: string
 	seasons: 'meteo-north' | 'meteo-south'

@@ -17,6 +17,15 @@ describe('data/countries', () => {
 				}
 			})
 
+			it('has its own pages in known languages, including Russian', () => {
+				const langs = Object.keys(c.pages)
+				expect(langs).toContain('ru')
+				for (const lang of langs) {
+					expect(LANGS, lang).toContain(lang)
+					expect(c.pages[lang as keyof typeof c.pages], lang).toBeTruthy()
+				}
+			})
+
 			it('has a valid week and leave rules', () => {
 				expect([1, 7]).toContain(c.week.start)
 				for (const d of c.week.weekend) expect(d >= 1 && d <= 7).toBe(true)

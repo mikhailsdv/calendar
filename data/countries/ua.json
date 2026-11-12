@@ -9,6 +9,11 @@
 		"be": "Украіна",
 		"uk": "Україна"
 	},
+	"pages": {
+		"uk": "України",
+		"ru": "Украины",
+		"en": "Ukraine"
+	},
 	"locale": "uk-UA",
 	"timezone": "Europe/Kyiv",
 	"seasons": "meteo-north",

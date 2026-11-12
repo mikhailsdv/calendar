@@ -16,7 +16,8 @@
 	grid-template-columns: minmax(0, 1fr) auto;
 	grid-template-areas:
 		'title actions'
-		'subtitle subtitle';
+		'subtitle subtitle'
+		'stats stats';
 	align-items: start;
 	gap: 2px 16px;
 	margin-bottom: 24px;
@@ -35,6 +36,15 @@
 	color: var(--text-2);
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
+}
+
+/* Цифры года основной страны: коротко и мелко, но в тексте страницы — их видят поисковики */
+.stats {
+	grid-area: stats;
+	margin-top: 2px;
+	font-size: 13px;
+	color: var(--text-3);
+	font-variant-numeric: tabular-nums;
 }
 
 .subtitle {

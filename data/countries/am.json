@@ -9,6 +9,11 @@
 		"be": "Арменія",
 		"uk": "Вірменія"
 	},
+	"pages": {
+		"hy": "Հայաստանի",
+		"ru": "Армении",
+		"en": "Armenia"
+	},
 	"locale": "hy-AM",
 	"timezone": "Asia/Yerevan",
 	"seasons": "meteo-north",

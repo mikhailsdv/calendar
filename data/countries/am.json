@@ -37,6 +37,11 @@
 	},
 	"leave": {
 		"unit": "working",
+		"pay": {
+			"days": "workdays",
+			"divisor": 21,
+			"source": "https://armenian-lawyer.com/business-immigration/armenian-annual-leave-calculation-guide/"
+		},
 		"minDays": 20,
 		"notCounted": [],
 		"note": "Отпуск считается в рабочих днях: 20 при пятидневке, 24 при шестидневке. Нерабочие дни в отпуске не списываются сами собой."

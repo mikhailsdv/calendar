@@ -31,6 +31,7 @@ export const defaultSettings = (lang: Lang, country: string | null = null): Sett
 	showObservances: true,
 	showWeekNumbers: false,
 	budget: 5,
+	navigatorGoal: 'rest',
 })
 
 export type YearCache = Record<string, Record<number, YearData>>

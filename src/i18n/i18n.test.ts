@@ -93,7 +93,15 @@ describe('helpers', () => {
 		expect(formatDate(await i18nOf('ru'), '2027-05-10')).toBe('10 мая 2027')
 		expect(formatDate(await i18nOf('en'), '2027-05-10')).toBe('May 10, 2027')
 		expect(formatDate(await i18nOf('uk'), '2027-05-10', 'short')).toBe('10 травня')
-		expect(formatRange(await i18nOf('ru'), '2027-05-04', '2027-05-07')).toBe('4 мая — 7 мая 2027')
+		const ru = await i18nOf('ru')
+		expect(formatRange(ru, '2027-05-04', '2027-05-07')).toBe('4–7 мая 2027')
+		expect(formatRange(ru, '2027-05-04', '2027-05-07', 2027)).toBe('4–7 мая')
+		expect(formatRange(ru, '2027-04-29', '2027-05-07', 2027)).toBe('29 апреля — 7 мая')
+		expect(formatRange(ru, '2027-04-29', '2027-05-07', 2026)).toBe('29 апреля — 7 мая 2027')
+		expect(formatRange(ru, '2026-12-29', '2027-01-07', 2026)).toBe(
+			'29 декабря 2026 — 7 января 2027'
+		)
+		expect(formatRange(await i18nOf('en'), '2027-05-04', '2027-05-07')).toBe('May 4–7, 2027')
 		expect(weekdayName(await i18nOf('be'), '2027-05-10')).toBe('панядзелак')
 	})
 

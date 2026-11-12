@@ -37,6 +37,11 @@
 	},
 	"leave": {
 		"unit": "calendar",
+		"pay": {
+			"days": "workdays",
+			"divisor": "year-workdays",
+			"source": "https://buh.mcfr.kz/article/1160-kak-rasschitat-i-oplatit-otpusknye"
+		},
 		"minDays": 24,
 		"notCounted": ["holiday"],
 		"note": "Праздничные дни в отпуске не учитываются и продлевают его."

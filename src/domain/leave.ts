@@ -1,6 +1,7 @@
 import type {Country, YearLookup} from '../data/types'
 import {dayOf, leaveNotCountedOn} from './calendar'
 import {addDays, diffDays, type ISODate, yearOf} from './dates'
+import {vacationMoney} from './money'
 
 export interface LeaveResult {
 	from: ISODate
@@ -16,6 +17,8 @@ export interface LeaveResult {
 	rest: {from: ISODate; to: ISODate; days: number}
 	/** Дней отдыха на один списанный день */
 	ratio: number
+	/** Отпускные минус зарплата за эти дни, в долях месячного оклада (см. money.ts) */
+	money: number
 }
 
 /** Дальше этого не расширяем окно отдыха (защита от бесконечного цикла на кривых данных) */
@@ -66,5 +69,6 @@ export const computeLeave = (
 		workdays,
 		rest: {from: restFrom, to: restTo, days: restDays},
 		ratio: restDays / Math.max(charged, 1),
+		money: vacationMoney(country, lookup, from, to, d => chargesDay(country, lookup, d)),
 	}
 }

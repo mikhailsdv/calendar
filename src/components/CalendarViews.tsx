@@ -65,7 +65,8 @@ interface CellProps {
 	selected: boolean
 	pair: boolean
 	range: ReturnType<typeof rangeState>
-	showObservances: boolean
+	/** Другие выбранные страны, у которых этот будний день нерабочий: показываем точками их цвета */
+	others: string[]
 	ariaLabel: string
 }
 
@@ -80,7 +81,7 @@ const DayCell = ({
 	selected,
 	pair,
 	range,
-	showObservances,
+	others,
 	ariaLabel,
 }: CellProps) => (
 	<button
@@ -99,6 +100,7 @@ const DayCell = ({
 		}
 		aria-pressed={selected}
 		aria-label={ariaLabel}
+		title={ariaLabel}
 	>
 		<span class={s.dayNum}>{parseISO(date).day}</span>
 		{variant === 'big' && label ? (
@@ -106,17 +108,13 @@ const DayCell = ({
 				{label}
 			</span>
 		) : null}
-		<span class={s.segs} aria-hidden="true">
-			{infos.map((info, i) => (
-				<i
-					key={countries[i]!.id}
-					class={s.seg}
-					data-k={info.kind}
-					data-obs={showObservances && info.observance ? '' : undefined}
-					data-c={countries[i]!.id}
-				/>
-			))}
-		</span>
+		{others.length ? (
+			<span class={s.dots} aria-hidden="true">
+				{others.map(id => (
+					<i key={id} data-c={id} />
+				))}
+			</span>
+		) : null}
 	</button>
 )
 
@@ -157,6 +155,15 @@ const useCellProps = () => {
 				if (holiday) label = localized(holiday.name, i18n.lang)
 			}
 		}
+		// Выходные у всех стран одинаковые, поэтому отмечаем только нерабочие будни других стран
+		const others = countries.slice(1).filter((_, i) => infos[i + 1]!.off && !infos[i + 1]!.weekend)
+		const statuses = [
+			statusOf(countries[0], infos[0]),
+			...others.map(
+				c =>
+					`${localized(c.name, i18n.lang)}: ${statusOf(c, infos[countries.indexOf(c)])?.toLowerCase()}`
+			),
+		].filter(Boolean)
 		return {
 			date,
 			infos,
@@ -168,10 +175,10 @@ const useCellProps = () => {
 			selected: date === selected,
 			pair: pairs.has(date) && date !== selected,
 			range: rangeState(date, range, hover),
-			showObservances,
+			others: others.map(c => c.id),
 			ariaLabel: withStatus(
 				`${formatDate(i18n, date)}, ${weekdayName(i18n, date)}`,
-				statusOf(countries[0], infos[0])
+				statuses.length ? statuses.join('; ') : null
 			),
 		}
 	}
@@ -312,7 +319,7 @@ export const LanesView = () => {
 	const range = store.mode.value === 'vacation' ? store.range.value : null
 	const hover = store.hover.value
 	const home = store.home.value
-	const showObservances = store.settings.value.showObservances
+	const today = store.today.value
 	const season = seasonOf(month, home.seasons)
 	const Icon = SEASON_ICON[season]
 	const statusOf = useDayStatus()
@@ -332,7 +339,7 @@ export const LanesView = () => {
 					{days.map(date => (
 						<span
 							key={date}
-							class={`${s.laneHead} ${dayOf(home, lookup, date).off ? s.laneHeadWeekend : ''}`}
+							class={`${s.laneHead} ${dayOf(home, lookup, date).off ? s.laneHeadWeekend : ''} ${date === today ? s.laneHeadToday : ''}`}
 						>
 							<b>{parseISO(date).day}</b>
 							{weekdayShort(i18n, isoWeekday(date))}
@@ -357,7 +364,6 @@ export const LanesView = () => {
 										data-date={date}
 										data-country={country.id}
 										data-k={info.kind}
-										data-obs={showObservances && info.observance ? '' : undefined}
 										data-range={r?.kind}
 										data-pair={isPair && date !== selected ? '' : undefined}
 										aria-pressed={date === selected}
@@ -371,19 +377,6 @@ export const LanesView = () => {
 							}}
 						/>
 					))}
-					<span class={s.laneLabel} aria-hidden="true" />
-					{days.map(date => {
-						const working = countries.filter(c => !dayOf(c, lookup, date).off).length
-						return (
-							<span
-								key={date}
-								class={`${s.capacity} ${working === 0 ? s.capacityNone : ''}`}
-								title={`${working}/${countries.length}`}
-							>
-								{working}
-							</span>
-						)
-					})}
 				</div>
 			</div>
 		</section>
@@ -414,7 +407,7 @@ const TransferArrows = ({container}: {container: {current: HTMLDivElement | null
 	const selected = store.mode.value === 'view' ? store.selected.value : null
 	const pairs = transferPairs(store, selected)
 	const view = store.settings.value.view
-	const [paths, setPaths] = useState<{d: string; color: string; x: number; y: number}[]>([])
+	const [paths, setPaths] = useState<{d: string; color: string; arrow: string}[]>([])
 	const key = `${view}|${store.year.value}|${store.month.value}|${pairs.map(p => `${p.country.id}${p.from}${p.to}`).join()}`
 
 	useLayoutEffect(() => {
@@ -431,7 +424,7 @@ const TransferArrows = ({container}: {container: {current: HTMLDivElement | null
 						? `[data-date="${date}"][data-country="${country}"]`
 						: `[data-date="${date}"]`
 				)
-			const next: {d: string; color: string; x: number; y: number}[] = []
+			const next: {d: string; color: string; arrow: string}[] = []
 			for (const p of pairs) {
 				const a = find(p.from, p.country.id)
 				const b = find(p.to, p.country.id)
@@ -442,14 +435,29 @@ const TransferArrows = ({container}: {container: {current: HTMLDivElement | null
 				const y1 = ra.top + ra.height / 2 - base.top
 				const x2 = rb.left + rb.width / 2 - base.left
 				const y2 = rb.top + rb.height / 2 - base.top
-				const lift = Math.min(80, Math.max(24, Math.hypot(x2 - x1, y2 - y1) / 3))
-				const mx = (x1 + x2) / 2
-				const my = Math.min(y1, y2) - lift
+				// Дуга симметрично прогибается вниз от середины отрезка: вершина на sag px от прямой.
+				// Контрольная точка квадратичной кривой вдвое дальше вершины
+				const dx = x2 - x1
+				const dy = y2 - y1
+				const length = Math.hypot(dx, dy) || 1
+				const sag = Math.min(36, Math.max(12, length / 6))
+				let nx = -dy / length
+				let ny = dx / length
+				if (ny < 0 || (ny === 0 && nx < 0)) [nx, ny] = [-nx, -ny]
+				const cx = (x1 + x2) / 2 + nx * sag * 2
+				const cy = (y1 + y2) / 2 + ny * sag * 2
+				// Стрелка по касательной в конце; линия обрывается у её основания, чтобы пунктир не торчал
+				const tx = x2 - cx
+				const ty = y2 - cy
+				const t = Math.hypot(tx, ty) || 1
+				const [ux, uy] = [tx / t, ty / t]
+				const head = 9
+				const bx = x2 - ux * head
+				const by = y2 - uy * head
 				next.push({
-					d: `M${x1},${y1} Q${mx},${my} ${x2},${y2}`,
+					d: `M${x1},${y1} Q${cx},${cy} ${bx},${by}`,
 					color: countryColor(p.country.id),
-					x: x2,
-					y: y2,
+					arrow: `${x2},${y2} ${bx - uy * 5},${by + ux * 5} ${bx + uy * 5},${by - ux * 5}`,
 				})
 			}
 			setPaths(next)
@@ -473,8 +481,9 @@ const TransferArrows = ({container}: {container: {current: HTMLDivElement | null
 						stroke-width="2.5"
 						stroke-dasharray="5 4"
 						stroke-linecap="round"
+						stroke-opacity="0.55"
 					/>
-					<circle cx={p.x} cy={p.y} r="4.5" fill="currentColor" />
+					<polygon points={p.arrow} fill="currentColor" fill-opacity="0.85" />
 				</g>
 			))}
 		</svg>
@@ -609,28 +618,45 @@ export const CalendarArea = () => {
 	)
 }
 
+/** Обозначения: красный — нерабочий день основной страны, точка — нерабочий будний день другой страны */
 export const Legend = () => {
-	const {t} = useI18n()
-	const home = useStore().home.value
-	const items: [string, string, boolean?][] = [
-		['holiday', t.kinds.holiday],
-		['transfer', t.kinds.transfer],
-		['weekend', t.kinds.weekend],
-		['workweekend', t.kinds.workweekend],
-		['short', t.kinds.short],
-		['work', t.kinds.observance, true],
-	]
+	const {t, lang} = useI18n()
+	const store = useStore()
+	const home = store.home.value
+	const others = store.countries.value.slice(1)
+	const lanes = store.settings.value.view === 'lanes'
 	return (
-		<div class={s.legend} aria-label={t.legend}>
+		<div class={s.legend} aria-label={t.legend.title}>
 			<ul>
-				{items.map(([kind, label, obs]) => (
-					<li key={label}>
-						<span class={s.legendSwatch} aria-hidden="true">
-							<i class={s.seg} data-k={kind} data-obs={obs ? '' : undefined} data-c={home.id} />
-						</span>
-						{label}
-					</li>
-				))}
+				{lanes ? (
+					<>
+						<li>
+							<span class={`${s.swatch} ${s.swatchHoliday}`} data-c={home.id} aria-hidden="true" />
+							{t.legend.holiday}
+						</li>
+						<li>
+							<span class={`${s.swatch} ${s.swatchWeekend}`} data-c={home.id} aria-hidden="true" />
+							{t.legend.weekend}
+						</li>
+					</>
+				) : (
+					<>
+						<li>
+							<span class={`${s.swatch} ${s.swatchOff}`} aria-hidden="true" />
+							{fmt(t.legend.off, {country: localized(home.name, lang)})}
+						</li>
+						{others.length ? (
+							<li>
+								<span class={s.legendDots} aria-hidden="true">
+									{others.map(c => (
+										<i key={c.id} data-c={c.id} />
+									))}
+								</span>
+								{t.legend.other}
+							</li>
+						) : null}
+					</>
+				)}
 			</ul>
 		</div>
 	)

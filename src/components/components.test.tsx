@@ -76,15 +76,18 @@ describe('calendar', () => {
 		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries).toEqual(['ru', 'by'])
 	})
 
-	it('renders a year with one segment per country', async () => {
+	it('marks weekdays off in other countries with dots and explains them on hover', async () => {
 		saveAllCountries()
 		const {container} = await renderApp()
 		expect(container.querySelectorAll('button[data-date]')).toHaveLength(365)
-		const segs = cell(container, '2027-05-10').querySelectorAll('i')
-		expect(segs).toHaveLength(5)
-		expect(segs[0]!.dataset.k).toBe('transfer')
-		expect(segs[2]!.dataset.k).toBe('transfer')
-		expect(segs[3]!.dataset.k).toBe('work')
+		// 10 мая 2027: перенос в России (красный день), Казахстане и Беларуси; Армения и Украина работают
+		const day = cell(container, '2027-05-10')
+		expect(day.dataset.off).toBe('')
+		expect([...day.querySelectorAll('i')].map(i => i.dataset.c)).toEqual(['kz', 'by'])
+		expect(day.title).toContain('Казахстан')
+		expect(day.title).toContain('Беларусь')
+		// В обычные выходные точек нет: у всех стран они одинаковые
+		expect(cell(container, '2027-05-15').querySelectorAll('i')).toHaveLength(0)
 	})
 
 	it('highlights holidays of the main country', async () => {
@@ -127,11 +130,15 @@ describe('calendar', () => {
 	it('toggles countries and keeps at least one', async () => {
 		saveAllCountries()
 		const {container, getByRole} = await renderApp()
-		const chip = within(getByRole('group', {name: 'Страны'})).getByRole('button', {name: /Армения/})
+		const chip = within(getByRole('group', {name: 'Страны'})).getByRole('button', {
+			name: /Беларусь/,
+		})
 		expect(chip.getAttribute('aria-pressed')).toBe('true')
 		fireEvent.click(chip)
 		expect(chip.getAttribute('aria-pressed')).toBe('false')
-		expect(cell(container, '2027-05-10').querySelectorAll('i')).toHaveLength(4)
+		expect([...cell(container, '2027-05-10').querySelectorAll('i')].map(i => i.dataset.c)).toEqual([
+			'kz',
+		])
 	})
 
 	it('names near days in words', async () => {
@@ -228,7 +235,7 @@ describe('calendar', () => {
 		try {
 			const {container} = await renderApp()
 			expect(cell(container, '2027-05-05').dataset.range).toBe('in')
-			expect(cell(container, '2027-05-10').querySelectorAll('i')).toHaveLength(2)
+			expect(container.querySelectorAll('[data-c][aria-pressed="true"]')).toHaveLength(2)
 			expect(location.search).toBe('?utm_source=tg')
 			expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
 		} finally {

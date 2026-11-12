@@ -44,9 +44,25 @@ const CountryName = ({country}: {country: Country}) => {
 	)
 }
 
-const useRatio = () => {
-	const {lang} = useI18n()
-	return useMemo(() => new Intl.NumberFormat(lang, {maximumFractionDigits: 1}), [lang])
+/**
+ * Деньги за отпуск относительно работы в те же дни, в процентах месячного оклада:
+ * зелёный — отпускные больше зарплаты за эти дни, красный — меньше
+ */
+const MoneyBadge = ({value}: {value: number}) => {
+	const {t, lang} = useI18n()
+	const percent = Math.round(value * 100)
+	// Типографский минус вместо дефиса: «−7 %» читается как число, а не как тире
+	const text = new Intl.NumberFormat(lang, {signDisplay: 'exceptZero'})
+		.format(percent)
+		.replace('-', '−')
+	return (
+		<span
+			class={`${s.money} ${percent > 0 ? s.moneyUp : percent < 0 ? s.moneyDown : ''}`}
+			title={t.vacation.moneyHint}
+		>
+			{fmt(t.vacation.money, {value: text})}
+		</span>
+	)
 }
 
 /** «Завтра», «позавчера», «через 5 дней» */
@@ -244,10 +260,10 @@ const DayRows = ({date}: {date: ISODate}) => {
 
 const VacationResult = ({from, to}: {from: ISODate; to: ISODate}) => {
 	const store = useStore()
+	const thisYear = store.today.value ? Number(store.today.value.slice(0, 4)) : null
 	const i18n = useI18n()
 	const {t, lang} = i18n
 	const lookup = store.lookup.value
-	const ratio = useRatio()
 	const home = store.home.value
 	const hint = useMemo(() => improveSelection(home, lookup, from, to), [home, lookup, from, to])
 
@@ -263,12 +279,15 @@ const VacationResult = ({from, to}: {from: ISODate; to: ISODate}) => {
 							<span class={s.stripe} />
 							<div class={s.hintRow}>
 								<CountryName country={country} />
-								<span class={s.ratio}>{fmt(t.vacation.ratio, {x: ratio.format(r.ratio)})}</span>
+								<MoneyBadge value={r.money} />
 							</div>
 							<div>
 								<p class={s.status}>
 									{t.vacation.rest}: {plural(lang, t.plural.days, r.rest.days)}
-									<span class={s.meta}> · {formatRange(i18n, r.rest.from, r.rest.to)}</span>
+									<span class={s.meta}>
+										{' '}
+										· {formatRange(i18n, r.rest.from, r.rest.to, thisYear)}
+									</span>
 								</p>
 								<p class={s.stats}>
 									<span>
@@ -284,6 +303,7 @@ const VacationResult = ({from, to}: {from: ISODate; to: ISODate}) => {
 					)
 				})}
 			</ul>
+			<p class={s.note}>{t.vacation.moneyNote}</p>
 			{hint ? (
 				<div class={s.hint}>
 					<b>
@@ -292,7 +312,7 @@ const VacationResult = ({from, to}: {from: ISODate; to: ISODate}) => {
 					<div class={s.hintRow}>
 						<span>
 							{fmt(t.vacation.hintText, {
-								range: formatRange(i18n, hint.from, hint.to),
+								range: formatRange(i18n, hint.from, hint.to, thisYear),
 								rest: plural(lang, t.plural.days, hint.result.rest.days),
 								charged: plural(lang, t.plural.days, hint.result.charged),
 							})}
@@ -320,6 +340,7 @@ const VacationResult = ({from, to}: {from: ISODate; to: ISODate}) => {
 
 const Navigator = () => {
 	const store = useStore()
+	const thisYear = store.today.value ? Number(store.today.value.slice(0, 4)) : null
 	const i18n = useI18n()
 	const {t, lang} = i18n
 	const countries = store.countries.value
@@ -329,12 +350,12 @@ const Navigator = () => {
 	const year = store.year.value
 	const lookup = store.lookup.value
 	const today = store.today.value
-	const ratio = useRatio()
+	const goal = store.settings.value.navigatorGoal
 
 	const range = useMemo(() => searchRange(year, today, YEARS[YEARS.length - 1]!), [year, today])
 	const windows = useMemo(
-		() => bestWindows(country, lookup, {from: range.from, to: range.to, budget}),
-		[country, lookup, range, budget]
+		() => bestWindows(country, lookup, {from: range.from, to: range.to, budget, goal}),
+		[country, lookup, range, budget, goal]
 	)
 
 	const setBudget = (value: number) => {
@@ -354,13 +375,29 @@ const Navigator = () => {
 					{range.ahead ? t.navigator.horizon : fmt(t.navigator.horizonYear, {year})}
 				</p>
 			</div>
+			<div class={`segmented ${s.goal}`} role="group" aria-label={t.navigator.goal}>
+				{(['rest', 'money'] as const).map(g => (
+					<button
+						key={g}
+						type="button"
+						aria-pressed={goal === g}
+						onClick={() => {
+							store.updateSettings({navigatorGoal: g})
+							track('navigator_goal_change', {goal: g})
+						}}
+					>
+						{t.navigator.goals[g]}
+					</button>
+				))}
+			</div>
 			<div class={s.controls}>
 				<span>{t.navigator.budget}</span>
 				<span class={s.stepper}>
 					<button
 						type="button"
-						class="btn btn-icon"
+						class="btn btn-ghost btn-sm btn-icon"
 						aria-label="−"
+						disabled={budget <= 1}
 						onClick={() => setBudget(budget - 1)}
 					>
 						<MinusIcon />
@@ -368,8 +405,9 @@ const Navigator = () => {
 					<output aria-live="polite">{budget}</output>
 					<button
 						type="button"
-						class="btn btn-icon"
+						class="btn btn-ghost btn-sm btn-icon"
 						aria-label="+"
+						disabled={budget >= 28}
 						onClick={() => setBudget(budget + 1)}
 					>
 						<PlusIcon />
@@ -406,16 +444,16 @@ const Navigator = () => {
 								}}
 							>
 								<div>
-									{formatRange(i18n, w.from, w.to)}
+									{formatRange(i18n, w.from, w.to, thisYear)}
 									<span>
 										{fmt(t.navigator.item, {
 											rest: plural(lang, t.plural.days, w.rest.days),
 											charged: plural(lang, t.plural.days, w.charged),
 										})}{' '}
-										· {formatRange(i18n, w.rest.from, w.rest.to)}
+										· {formatRange(i18n, w.rest.from, w.rest.to, thisYear)}
 									</span>
 								</div>
-								<span class={s.ratio}>{fmt(t.vacation.ratio, {x: ratio.format(w.ratio)})}</span>
+								<MoneyBadge value={w.money} />
 							</button>
 						</li>
 					))}
@@ -461,25 +499,22 @@ const ShareButton = ({from, to}: {from: ISODate; to: ISODate}) => {
 	return (
 		<button
 			type="button"
-			class={`btn btn-ghost btn-sm ${copied ? s.copied : 'btn-icon'}`}
-			aria-label={t.vacation.share}
-			title={t.vacation.share}
+			class={`btn btn-ghost btn-sm btn-icon ${copied ? s.copied : ''}`}
+			aria-label={copied ? t.vacation.copied : t.vacation.share}
+			title={copied ? t.vacation.copied : t.vacation.share}
 			onClick={share}
 		>
-			{copied ? (
-				<>
-					<CheckIcon />
-					<span aria-live="polite">{t.vacation.copied}</span>
-				</>
-			) : (
-				<LinkIcon />
-			)}
+			{copied ? <CheckIcon /> : <LinkIcon />}
+			<span class="sr-only" aria-live="polite">
+				{copied ? t.vacation.copied : ''}
+			</span>
 		</button>
 	)
 }
 
 export const Panel = () => {
 	const store = useStore()
+	const thisYear = store.today.value ? Number(store.today.value.slice(0, 4)) : null
 	const i18n = useI18n()
 	const {t} = i18n
 	const mode = store.mode.value
@@ -535,10 +570,11 @@ export const Panel = () => {
 		<>
 			<div class={s.headRow}>
 				{range?.end ? (
-					<div>
-						<p class={s.title}>{formatRange(i18n, range.start, range.end)}</p>
+					<div class={s.titleBlock}>
+						<p class={s.title}>{formatRange(i18n, range.start, range.end, thisYear)}</p>
 						<p class={s.sub}>
-							{t.vacation.title} · {t.vacation.calendarDays}: {diffDays(range.start, range.end) + 1}
+							{t.vacation.title} ·{' '}
+							{plural(i18n.lang, t.plural.days, diffDays(range.start, range.end) + 1)}
 						</p>
 					</div>
 				) : (
@@ -547,8 +583,14 @@ export const Panel = () => {
 				<span class={s.headActions}>
 					{range?.end ? <ShareButton from={range.start} to={range.end} /> : null}
 					{range ? (
-						<button type="button" class="btn btn-danger btn-sm" onClick={close}>
-							{t.vacation.clear}
+						<button
+							type="button"
+							class="btn btn-danger btn-sm btn-icon"
+							aria-label={t.vacation.clear}
+							title={t.vacation.clear}
+							onClick={close}
+						>
+							<CloseIcon />
 						</button>
 					) : collapsed ? (
 						<button
@@ -613,10 +655,7 @@ export const Panel = () => {
 				) : selected ? (
 					<DayRows date={selected} />
 				) : (
-					<>
-						<Upcoming />
-						<p class={s.empty}>{t.details.empty}</p>
-					</>
+					<Upcoming />
 				)}
 			</div>
 		</aside>

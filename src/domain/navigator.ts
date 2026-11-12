@@ -11,6 +11,8 @@ interface BestWindowsOptions {
 	/** Сколько дней отпуска готовы потратить */
 	budget: number
 	limit?: number
+	/** Что искать: больше дней отдыха или больше денег (см. money.ts) */
+	goal?: 'rest' | 'money'
 }
 
 /**
@@ -28,36 +30,40 @@ export const searchRange = (year: number, today: ISODate | null, lastYear: numbe
 const overlaps = (a: LeaveResult, b: LeaveResult) =>
 	a.rest.from <= b.rest.to && b.rest.from <= a.rest.to
 
-const byValue = (a: LeaveResult, b: LeaveResult) =>
+const byRest = (a: LeaveResult, b: LeaveResult) =>
 	b.rest.days - a.rest.days || a.charged - b.charged || (a.from < b.from ? -1 : 1)
 
+const byMoney = (a: LeaveResult, b: LeaveResult) =>
+	b.money - a.money || b.rest.days - a.rest.days || (a.from < b.from ? -1 : 1)
+
 /**
- * Лучшие окна отпуска в диапазоне: максимум дней отдыха при списании не больше budget.
- * Отпуск начинается и заканчивается рабочим днём: начинать с выходного бессмысленно,
- * прилегающие выходные и так попадают в отдых.
+ * Лучшие окна отпуска в диапазоне при списании не больше budget.
+ * Цель «отдых»: максимум непрерывного отдыха; отпуск начинается и заканчивается рабочим днём,
+ * прилегающие выходные и так попадают в отдых. Цель «деньги»: максимум отпускных относительно
+ * зарплаты; тут окно может начинаться и с выходного — где выходные оплачиваются, это выгодно.
  */
 export const bestWindows = (
 	country: Country,
 	lookup: YearLookup,
-	{from, to, budget, limit = 3}: BestWindowsOptions
+	{from, to, budget, limit = 3, goal = 'rest'}: BestWindowsOptions
 ): LeaveResult[] => {
 	if (budget < 1) return []
 	const candidates: LeaveResult[] = []
 
 	for (let start = from; start <= to; start = addDays(start, 1)) {
-		if (dayOf(country, lookup, start).off) continue
+		if (goal === 'rest' && dayOf(country, lookup, start).off) continue
 		let end: ISODate | null = null
 		let charged = 0
 		for (let d = start; diffDays(start, d) < budget * 3 + 14; d = addDays(d, 1)) {
 			charged += chargesDay(country, lookup, d)
 			if (charged > budget) break
-			if (!dayOf(country, lookup, d).off) end = d
+			if (goal === 'money' || !dayOf(country, lookup, d).off) end = d
 		}
 		if (end) candidates.push(computeLeave(country, lookup, start, end))
 	}
 
 	const picked: LeaveResult[] = []
-	for (const candidate of candidates.sort(byValue)) {
+	for (const candidate of candidates.sort(goal === 'money' ? byMoney : byRest)) {
 		if (picked.some(p => overlaps(p, candidate))) continue
 		picked.push(candidate)
 		if (picked.length === limit) break

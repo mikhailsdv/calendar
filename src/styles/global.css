@@ -1,31 +1,34 @@
 :root {
 	--bg: #ffffff;
-	--surface: #f7f7f5;
-	--surface-2: #efefeb;
-	--text: #1c1c1e;
-	--text-2: #5c5c62;
-	--text-3: #8c8c92;
-	--border: #e5e5e0;
-	--border-strong: #cdcdc7;
+	--surface: #f6f8fb;
+	--surface-2: #eef1f6;
+	--text: #1b1f27;
+	--text-2: #5a6170;
+	--text-3: #8b93a1;
+	--border: #e8ecf2;
+	--border-strong: #d5dce6;
 	--accent: #5b4fd6;
 	--accent-text: #4a3fc0;
 	--accent-bg: #ecebfb;
 	--range: rgba(91, 79, 214, 0.16);
 	--range-preview: rgba(91, 79, 214, 0.1);
-	--seg-empty: #ebebe7;
-	--seg-weekend: #c8c7c0;
+	--zebra: #f9fafd;
+	--seg-empty: #edf0f5;
+	--seg-weekend: #c9d0db;
 	--off-bg: #fdf1f0;
-	--off-border: #f6dcda;
+	--off-border: #f7e1df;
 	--holiday-bg: #fbe2e0;
 	--off-text: #c4423b;
 	--danger-bg: #fdeceb;
 	--danger-bg-hover: #fadbd8;
 	--danger-text: #b8372f;
+	--good-bg: #e5f4e8;
+	--good-text: #23763a;
 	--on-accent: #ffffff;
 	--flag-outline: rgba(0, 0, 0, 0.12);
 	--warning-bg: #fdf3dc;
 	--warning-text: #7a5300;
-	--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235c5c62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6-6'/%3E%3C/svg%3E");
+	--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235a6170' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6-6'/%3E%3C/svg%3E");
 
 	--c-ru: #3b6fd8;
 	--c-kz: #16a0b3;
@@ -33,19 +36,25 @@
 	--c-am: #df603a;
 	--c-ua: #dca70f;
 	--c-fallback: #8a6bd1;
+	--c-ru-soft: #d8e3f8;
+	--c-kz-soft: #cfebef;
+	--c-by-soft: #d5ebdb;
+	--c-am-soft: #f8dbd2;
+	--c-ua-soft: #f6e9c3;
+	--c-fallback-soft: #e4dcf5;
 
-	--season-winter: #e9f0fa;
+	--season-winter: #f0f5fc;
 	--season-winter-ink: #3f77bd;
-	--season-spring: #e8f4e7;
+	--season-spring: #eff7ef;
 	--season-spring-ink: #3f8f45;
-	--season-summer: #fbf2dc;
+	--season-summer: #fdf7e8;
 	--season-summer-ink: #b9840b;
-	--season-autumn: #f9eadf;
+	--season-autumn: #fcf2ea;
 	--season-autumn-ink: #bd6127;
 
 	--radius: 10px;
 	--radius-sm: 6px;
-	--shadow: 0 8px 28px rgba(20, 20, 30, 0.12), 0 2px 6px rgba(20, 20, 30, 0.06);
+	--shadow: 0 10px 30px rgba(30, 45, 80, 0.08), 0 1px 3px rgba(30, 45, 80, 0.06);
 	--font:
 		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans', 'Helvetica Neue', Arial,
 		'Noto Sans Armenian', sans-serif;
@@ -54,21 +63,22 @@
 }
 
 :root[data-theme='dark'] {
-	--bg: #131315;
-	--surface: #1c1c1f;
-	--surface-2: #26262a;
-	--text: #f1f1f4;
-	--text-2: #a7a7ae;
-	--text-3: #74747b;
-	--border: #2d2d32;
-	--border-strong: #3d3d43;
+	--bg: #111318;
+	--surface: #171a20;
+	--surface-2: #1f232b;
+	--text: #eef0f4;
+	--text-2: #a3a9b6;
+	--text-3: #737a87;
+	--border: #252a33;
+	--border-strong: #333a46;
 	--accent: #9a92f2;
 	--accent-text: #b4aef6;
 	--accent-bg: #2a2748;
 	--range: rgba(154, 146, 242, 0.24);
 	--range-preview: rgba(154, 146, 242, 0.11);
-	--seg-empty: #2b2b30;
-	--seg-weekend: #4b4b52;
+	--zebra: #15181e;
+	--seg-empty: #232832;
+	--seg-weekend: #3d4450;
 	--off-bg: #241a1b;
 	--off-border: #3a2628;
 	--holiday-bg: #36201f;
@@ -76,11 +86,13 @@
 	--danger-bg: #3a2123;
 	--danger-bg-hover: #4a2729;
 	--danger-text: #f6a39c;
+	--good-bg: #1b2e21;
+	--good-text: #84d49a;
 	--on-accent: #16142a;
 	--flag-outline: rgba(255, 255, 255, 0.16);
 	--warning-bg: #3a2f14;
 	--warning-text: #f0cf7a;
-	--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a7a7ae' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6-6'/%3E%3C/svg%3E");
+	--select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a3a9b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6l6-6'/%3E%3C/svg%3E");
 
 	--c-ru: #6f9bf0;
 	--c-kz: #44c1d1;
@@ -88,6 +100,12 @@
 	--c-am: #f08864;
 	--c-ua: #f0c440;
 	--c-fallback: #ad95ea;
+	--c-ru-soft: #22324f;
+	--c-kz-soft: #173b41;
+	--c-by-soft: #1e3625;
+	--c-am-soft: #44281f;
+	--c-ua-soft: #43391b;
+	--c-fallback-soft: #30284a;
 
 	--season-winter: #1b2533;
 	--season-winter-ink: #8db6ea;
@@ -170,21 +188,27 @@ button {
 /* Цвет страны для элементов с data-c; неизвестные страны получают запасной цвет */
 [data-c] {
 	--c: var(--c-fallback);
+	--c-soft: var(--c-fallback-soft);
 }
 [data-c='ru'] {
 	--c: var(--c-ru);
+	--c-soft: var(--c-ru-soft);
 }
 [data-c='kz'] {
 	--c: var(--c-kz);
+	--c-soft: var(--c-kz-soft);
 }
 [data-c='by'] {
 	--c: var(--c-by);
+	--c-soft: var(--c-by-soft);
 }
 [data-c='am'] {
 	--c: var(--c-am);
+	--c-soft: var(--c-am-soft);
 }
 [data-c='ua'] {
 	--c: var(--c-ua);
+	--c-soft: var(--c-ua-soft);
 }
 
 .sr-only {
@@ -218,6 +242,7 @@ button {
 }
 
 .btn-icon {
+	flex: none;
 	width: 36px;
 	padding: 0;
 }
@@ -266,6 +291,13 @@ button {
 	min-height: 32px;
 	padding: 0 10px;
 	font-size: 14px;
+}
+
+/* Маленькая иконка-кнопка — ровный квадрат 32×32 */
+.btn-sm.btn-icon {
+	width: 32px;
+	height: 32px;
+	padding: 0;
 }
 
 @media (hover: hover) {
@@ -358,11 +390,11 @@ button {
 }
 
 .table thead th {
-	border-bottom: 1px solid var(--border-strong);
+	border-bottom: 1px solid var(--border);
 }
 
 .table tbody tr:nth-child(even) {
-	background: var(--surface);
+	background: var(--zebra);
 }
 
 /* Своя стрелка вместо системной: у системной в каждом браузере свой отступ от края */

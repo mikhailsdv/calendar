@@ -12,8 +12,8 @@
  * Повторяет семантику `lftp mirror --delete`: всё, чего нет в архиве, удаляется. Пока не прошёл
  * swap, старая версия сайта не тронута.
  *
- * ZIP читается своими силами через zlib: расширение zip включено не на каждом хостинге, а zlib есть
- * почти везде. Архив собирает наш CI (`zip -qr`), поэтому хватает методов stored и deflate без zip64.
+ * ZIP распаковывается через ZipArchive (расширение zip). Если его нет, архив читается своими силами
+ * через zlib: архив собирает наш CI (`zip -qr`), поэтому хватает методов stored и deflate без zip64.
  */
 
 const STEP_BUDGET = 10;
@@ -126,12 +126,27 @@ function zipEntries($path)
 	return $entries;
 }
 
-// Распаковывает одну запись в $dest. Возвращает false при любой ошибке, в том числе при неверной CRC
+// Никаких абсолютных путей и выходов наверх через ..
+function safeName($name)
+{
+	return $name !== '' && $name[0] !== '/' && strpos($name, '\\') === false && !preg_match('#(^|/)\.\.(/|$)#', $name);
+}
+
+// Распаковывает одну запись через ZipArchive. CRC проверяет сама libzip
+function extractZipArchiveEntry($zip, $index, $dest)
+{
+	$name = $zip->getNameIndex($index);
+	if ($name === false || !safeName($name)) {
+		return false;
+	}
+	return $zip->extractTo($dest, $name);
+}
+
+// Распаковывает одну запись через zlib. Возвращает false при любой ошибке, в том числе при неверной CRC
 function extractEntry($fp, $entry, $dest)
 {
 	$name = $entry['name'];
-	// Никаких абсолютных путей и выходов наверх через ..
-	if ($name === '' || $name[0] === '/' || preg_match('#(^|/)\.\.(/|$)#', $name) || ($entry['flags'] & 1)) {
+	if (!safeName($name) || ($entry['flags'] & 1)) {
 		return false;
 	}
 	$target = $dest . '/' . $name;
@@ -209,8 +224,9 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
 $state = is_file($statePath) ? json_decode(file_get_contents($statePath), true) : null;
 
 if (!$state) {
-	if (!function_exists('gzinflate')) {
-		abort('PHP extension "zlib" is not available');
+	$engine = class_exists('ZipArchive') ? 'ziparchive' : (function_exists('gzinflate') ? 'zlib' : null);
+	if ($engine === null) {
+		abort('neither PHP extension "zip" nor "zlib" is available');
 	}
 	if (!is_file($zipPath)) {
 		abort('archive ' . $zipName . ' not found');
@@ -218,21 +234,49 @@ if (!$state) {
 	if ((!is_dir($newDir) && !mkdir($newDir, 0755)) || (!is_dir($oldDir) && !mkdir($oldDir, 0755))) {
 		abort('cannot create work dir');
 	}
-	$state = ['phase' => 'extract', 'next' => 0];
+	$state = ['phase' => 'extract', 'next' => 0, 'engine' => $engine];
 	saveState($state);
 }
 
 if ($state['phase'] === 'extract') {
-	$entries = zipEntries($zipPath);
-	$fp = fopen($zipPath, 'rb');
-	if ($entries === null || !$fp) {
-		fail($state, 'cannot read archive');
-	}
-	$total = count($entries);
-	for ($i = $state['next']; $i < $total; $i++) {
-		if (!extractEntry($fp, $entries[$i], $newDir)) {
+	if ($state['engine'] === 'ziparchive') {
+		$zip = new ZipArchive();
+		if ($zip->open($zipPath) !== true) {
+			fail($state, 'cannot read archive');
+		}
+		$total = $zip->numFiles;
+		$extract = function ($i) use ($zip, $newDir) {
+			return extractZipArchiveEntry($zip, $i, $newDir);
+		};
+		$nameOf = function ($i) use ($zip) {
+			return (string) $zip->getNameIndex($i);
+		};
+		$close = function () use ($zip) {
+			$zip->close();
+		};
+	} else {
+		$entries = zipEntries($zipPath);
+		$fp = fopen($zipPath, 'rb');
+		if ($entries === null || !$fp) {
+			fail($state, 'cannot read archive');
+		}
+		$total = count($entries);
+		$extract = function ($i) use ($fp, $entries, $newDir) {
+			return extractEntry($fp, $entries[$i], $newDir);
+		};
+		$nameOf = function ($i) use ($entries) {
+			return $entries[$i]['name'];
+		};
+		$close = function () use ($fp) {
 			fclose($fp);
-			fail($state, 'cannot extract ' . $entries[$i]['name']);
+		};
+	}
+
+	for ($i = $state['next']; $i < $total; $i++) {
+		if (!$extract($i)) {
+			$name = $nameOf($i);
+			$close();
+			fail($state, 'cannot extract ' . $name);
 		}
 		if (($i + 1) % SAVE_EVERY === 0) {
 			$state['next'] = $i + 1;
@@ -241,11 +285,11 @@ if ($state['phase'] === 'extract') {
 		if (timeIsUp()) {
 			$state['next'] = $i + 1;
 			saveState($state);
-			fclose($fp);
-			respond('DEPLOY_CONTINUE: extracted ' . ($i + 1) . '/' . $total);
+			$close();
+			respond('DEPLOY_CONTINUE: extracted ' . ($i + 1) . '/' . $total . ' (' . $state['engine'] . ')');
 		}
 	}
-	fclose($fp);
+	$close();
 
 	if (!is_file($newDir . '/index.html')) {
 		fail($state, 'index.html is missing in archive');

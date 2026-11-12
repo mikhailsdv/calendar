@@ -16,8 +16,7 @@
 	grid-template-columns: minmax(0, 1fr) auto;
 	grid-template-areas:
 		'title actions'
-		'subtitle subtitle'
-		'stats stats';
+		'subtitle subtitle';
 	align-items: start;
 	gap: 2px 16px;
 	margin-bottom: 24px;
@@ -36,15 +35,6 @@
 	color: var(--text-2);
 	letter-spacing: 0.02em;
 	text-transform: uppercase;
-}
-
-/* Цифры года основной страны: коротко и мелко, но в тексте страницы — их видят поисковики */
-.stats {
-	grid-area: stats;
-	margin-top: 2px;
-	font-size: 13px;
-	color: var(--text-3);
-	font-variant-numeric: tabular-nums;
 }
 
 .subtitle {
@@ -258,7 +248,7 @@
 	gap: 6px;
 	min-height: 34px;
 	padding: 0 12px 0 8px;
-	border: 1px solid var(--border-strong);
+	border: 1px solid var(--border);
 	border-radius: 999px;
 	background: var(--bg);
 	font-size: 14px;
@@ -333,6 +323,17 @@
 	align-items: center;
 	gap: 8px;
 	margin-bottom: 8px;
+}
+
+/* Совет про деньги над правилами стран */
+.moneyTip {
+	max-width: 70ch;
+	margin-bottom: 16px;
+	padding: 10px 12px;
+	border-radius: var(--radius-sm);
+	background: var(--surface);
+	font-size: 14px;
+	color: var(--text-2);
 }
 
 .rules {

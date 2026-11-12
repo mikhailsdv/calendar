@@ -79,6 +79,12 @@
 			"budget": "дней отпуска"
 		}
 	},
+	"navigator_goal_change": {
+		"description": "В навигаторе выбрана цель: отдых или деньги",
+		"params": {
+			"goal": "rest | money"
+		}
+	},
 	"navigator_apply": {
 		"description": "Выбрано окно, предложенное навигатором",
 		"params": {

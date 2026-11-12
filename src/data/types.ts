@@ -59,6 +59,17 @@ export interface Country {
 	}
 	leave: {
 		unit: 'calendar' | 'working'
+		/**
+		 * Как считаются отпускные: средний дневной заработок = средний месячный / divisor,
+		 * оплачиваются списанные дни (charged) или рабочие дни внутри отпуска (workdays).
+		 * divisor: число, «year-workdays» — среднее число рабочих дней в месяце года,
+		 * «year-calendar» — среднее число календарных дней в месяце без праздников
+		 */
+		pay: {
+			days: 'charged' | 'workdays'
+			divisor: number | 'year-workdays' | 'year-calendar'
+			source: string
+		}
 		minDays: number | null
 		notCounted: DayType[]
 		minPartDays?: number

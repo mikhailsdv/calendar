@@ -17,6 +17,8 @@ export interface Settings {
 	/** Колонка с номерами ISO-недель в месячном виде */
 	showWeekNumbers: boolean
 	budget: number
+	/** Что ищет навигатор: больше отдыха или больше денег */
+	navigatorGoal: 'rest' | 'money'
 }
 
 const VIEWS: View[] = ['year', 'month', 'lanes']
@@ -49,6 +51,7 @@ export const sanitizeSettings = (
 		showWeekNumbers:
 			typeof value.showWeekNumbers === 'boolean' ? value.showWeekNumbers : defaults.showWeekNumbers,
 		budget: Number.isInteger(budget) && budget >= 1 && budget <= 60 ? budget : defaults.budget,
+		navigatorGoal: pick(value.navigatorGoal, ['rest', 'money'] as const, defaults.navigatorGoal),
 	}
 }
 

@@ -53,11 +53,30 @@ export const formatDate = ({t}: I18n, date: ISODate, variant: 'full' | 'short' =
 	return fmt(t.dateFormat[variant], {d: day, MMMM: t.monthsGenitive[month - 1]!, yyyy: year})
 }
 
-export const formatRange = (i18n: I18n, from: ISODate, to: ISODate) => {
-	const sameYear = from.slice(0, 4) === to.slice(0, 4)
+/**
+ * Диапазон дат. Год не пишется, если обе даты в текущем году; в одном месяце — «4–7 мая».
+ * currentYear известен только после монтирования, до этого год пишется всегда
+ */
+export const formatRange = (
+	i18n: I18n,
+	from: ISODate,
+	to: ISODate,
+	currentYear: number | null = null
+) => {
+	const a = parseISO(from)
+	const b = parseISO(to)
+	const variant = a.year === b.year && b.year === currentYear ? 'short' : 'full'
+	if (a.year === b.year && a.month === b.month) {
+		const days = a.day === b.day ? String(a.day) : `${a.day}–${b.day}`
+		return fmt(i18n.t.dateFormat[variant], {
+			d: days,
+			MMMM: i18n.t.monthsGenitive[a.month - 1]!,
+			yyyy: a.year,
+		})
+	}
 	return fmt(i18n.t.dateFormat.range, {
-		from: formatDate(i18n, from, sameYear ? 'short' : 'full'),
-		to: formatDate(i18n, to, 'full'),
+		from: formatDate(i18n, from, a.year === b.year ? 'short' : 'full'),
+		to: formatDate(i18n, to, variant),
 	})
 }
 

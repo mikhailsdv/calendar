@@ -17,8 +17,6 @@ const en: Dict = {
 	header: {
 		h1: 'Working calendar {year}',
 		h1Country: '{country} working calendar {year}',
-		stats:
-			'{country}, {year}: {workdays} working days, {offdays} days off, {hours} working hours at {norm} h a week',
 		subtitle: 'Overlay up to {n} countries, see transferred days off and plan your vacation',
 		language: 'Language',
 		themeLight: 'Switch to light theme',
@@ -87,7 +85,13 @@ const en: Dict = {
 		observance: 'Holiday without a day off',
 		noData: 'No data for this year',
 	},
-	legend: 'Legend',
+	legend: {
+		title: 'Legend',
+		off: 'Day off or holiday: {country}',
+		other: 'Weekday off in another country',
+		holiday: 'Holiday or moved day off',
+		weekend: 'Weekend',
+	},
 	seasons: {winter: 'Winter', spring: 'Spring', summer: 'Summer', autumn: 'Autumn'},
 	details: {
 		week: 'week {n}',
@@ -105,7 +109,6 @@ const en: Dict = {
 		regime: '{name}: the holiday is a working day',
 		close: 'Close',
 		forecast: 'forecast',
-		empty: 'Tap a day to see its status in every country',
 	},
 	panel: {
 		expand: 'Expand',
@@ -119,22 +122,27 @@ const en: Dict = {
 		title: 'Vacation',
 		pickStart: 'Tap the first day of your vacation',
 		pickEnd: 'Tap the last day of your vacation',
-		calendarDays: 'Calendar days',
 		charged: 'Charged',
 		chargedWorking: 'Working days charged',
 		rest: 'Time off',
 		holidaysInside: 'holidays inside: {n}',
-		workdays: 'working days: {n}',
-		ratio: '×{x}',
+		workdays: 'Working days: {n}',
+		money: '{value}% of salary',
+		moneyHint:
+			'Vacation pay minus the salary you would earn working these days, as a share of your monthly salary',
+		moneyNote:
+			'% of salary shows how much more or less vacation pay brings than working the same days. An estimate for a fixed salary without bonuses',
 		clear: 'Clear',
 		share: 'Share link',
 		copied: 'Copied',
-		hintTitle: 'A better option',
+		hintTitle: 'More time off for the same days',
 		hintText: '{range}: {rest} off, {charged} charged',
 		apply: 'Pick',
 	},
 	navigator: {
 		title: 'Find the best dates',
+		goal: 'Optimize for',
+		goals: {rest: 'More time off', money: 'More money'},
 		budget: 'Vacation days',
 		country: 'Country',
 		empty: 'No suitable windows found',
@@ -186,6 +194,14 @@ const en: Dict = {
 		leaveCalendar:
 			'Annual leave is at least {n} calendar days. Holidays are not counted and extend it; transferred days off are charged.',
 		leaveWorking: 'Annual leave is at least {n} working days.',
+		payCharged:
+			'Vacation pay: average earnings for 12 months ÷ 12 ÷ {divisor} × paid vacation days.',
+		payWorkdays:
+			'Vacation pay: average daily earnings (monthly ÷ {divisor}) × working days inside the vacation.',
+		divisorWorkdays: 'the average number of working days in a month',
+		divisorCalendar: 'the average number of calendar days in a month without holidays',
+		moneyTip:
+			'Money-wise, a vacation pays off in months with more working days: a day of salary is cheaper there, while vacation pay does not depend on the month. Vacations next to holidays or before an annual bonus is counted usually pay less.',
 		notes: {
 			ru: 'Days off from New Year holidays that fall on a weekend are moved by decree to any date, even to the end of the year.',
 			kz: 'Religious holidays (Kurban Ait, Christmas) are not moved from weekends. The date of Kurban Ait follows the lunar calendar.',

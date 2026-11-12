@@ -32,6 +32,12 @@
 	min-height: 36px;
 }
 
+/* Даты отпуска и подпись под ними: первая строка по центру кнопок высотой 32 px в ряду 36 px */
+.titleBlock {
+	min-width: 0;
+	padding-top: 6px;
+}
+
 .headActions {
 	display: flex;
 	align-items: center;
@@ -63,7 +69,8 @@
 		padding: 16px;
 		border: 1px solid var(--border);
 		border-radius: var(--radius);
-		background: var(--surface);
+		background: var(--bg);
+		box-shadow: 0 1px 2px rgba(30, 45, 80, 0.04);
 	}
 
 	.grabber,
@@ -286,21 +293,46 @@
 
 .controls {
 	display: flex;
-	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
 	font-size: 13px;
 	color: var(--text-2);
 }
 
+.controls > span {
+	flex: none;
+}
+
+/* Выбор страны — справа от счётчика и забирает всю оставшуюся ширину */
+.controls select {
+	flex: 1;
+	min-width: 0;
+	padding: 0 26px 0 10px;
+	background-position: right 6px center;
+}
+
+/* Счётчик дней — та же «дорожка», что у выбора года и месяца: серая подложка, кнопки без рамки */
 .stepper {
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
+	padding: 2px;
+	border-radius: var(--radius-sm);
+	background: var(--surface-2);
+}
+
+.stepper :global(.btn) {
+	color: var(--text-2);
+}
+
+@media (hover: hover) {
+	.stepper :global(.btn:not(:disabled):hover) {
+		background: var(--bg);
+		color: var(--text);
+	}
 }
 
 .stepper output {
-	min-width: 2ch;
+	min-width: 3ch;
 	text-align: center;
 	font-weight: 600;
 	color: var(--text);
@@ -362,4 +394,41 @@
 /* Кнопка «Поделиться» после копирования ссылки */
 .copied {
 	color: var(--accent-text);
+}
+
+/* Деньги за отпуск: плюс — зелёный, минус — красный, ноль — нейтральный */
+.money {
+	flex: none;
+	margin-left: auto;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--surface-2);
+	color: var(--text-2);
+	font-weight: 600;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.moneyUp {
+	background: var(--good-bg);
+	color: var(--good-text);
+}
+
+.moneyDown {
+	background: var(--danger-bg);
+	color: var(--danger-text);
+}
+
+.note {
+	font-size: 12px;
+	color: var(--text-3);
+}
+
+.goal {
+	display: flex;
+}
+
+.goal button {
+	flex: 1;
 }

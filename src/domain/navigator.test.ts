@@ -43,6 +43,20 @@ describe('bestWindows', () => {
 		expect(searchRange(2027, '2027-06-01', 2027).to).toBe('2027-12-31')
 	})
 
+	it('finds money windows in long months, not around the May holidays', () => {
+		const range = {from: '2027-01-01', to: '2027-12-31', budget: 7}
+		const rest = bestWindows(country('ru'), lookupAll, range)
+		const money = bestWindows(country('ru'), lookupAll, {...range, goal: 'money'})
+		for (const w of money) {
+			expect(w.money).toBeGreaterThan(0)
+			expect(w.from.slice(5, 7)).not.toBe('05')
+		}
+		// Самое «длинное» по отдыху окно по деньгам хуже лучшего денежного
+		expect(Math.max(...money.map(w => w.money))).toBeGreaterThan(
+			Math.max(...rest.map(w => w.money))
+		)
+	})
+
 	it('returns nothing for an empty budget', () => {
 		expect(
 			bestWindows(country('ru'), lookupAll, {from: '2027-01-01', to: '2027-12-31', budget: 0})

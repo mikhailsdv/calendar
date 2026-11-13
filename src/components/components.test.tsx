@@ -336,6 +336,21 @@ describe('chrome', () => {
 		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).theme).toBe('dark')
 	})
 
+	it('offers language and theme in the settings dialog for phones', async () => {
+		const {getByRole, container} = await renderApp()
+		fireEvent.click(getByRole('button', {name: 'Настройки'}))
+		const dialog = within(container.querySelector('dialog')!)
+		const select = dialog.getByRole<HTMLSelectElement>('combobox', {name: 'Язык'})
+		expect([...select.options].map(o => o.value)).toEqual(['ru', 'en', 'kk', 'hy', 'be', 'uk'])
+		expect(select.value).toBe('ru')
+		const dark = dialog.getByRole('button', {name: 'Тёмная'})
+		expect(dark.getAttribute('aria-pressed')).toBe('false')
+		fireEvent.click(dark)
+		await new Promise(r => setTimeout(r, 0))
+		expect(document.documentElement.dataset.theme).toBe('dark')
+		expect(dark.getAttribute('aria-pressed')).toBe('true')
+	})
+
 	it('writes the Russian footer only for Russian', async () => {
 		const ru = await renderApp('ru')
 		expect(ru.container.textContent).toContain('Мейд виз ❤️ бай Миша Саидов')

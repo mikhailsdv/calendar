@@ -137,7 +137,7 @@ export const CalendarPage = ({
 				<RulesSection />
 			</main>
 			<Footer />
-			<SettingsDialog />
+			<SettingsDialog hrefFor={hrefFor} />
 		</div>
 	)
 }

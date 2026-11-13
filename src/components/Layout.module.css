@@ -10,23 +10,23 @@
 	}
 }
 
-/* Заголовок слева, группа «язык · тема · настройки» справа, подзаголовок на всю ширину */
+/* Заголовок слева, группа «язык · тема · печать · настройки» справа */
 .header {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;
-	grid-template-areas:
-		'title actions'
-		'subtitle subtitle';
 	align-items: start;
-	gap: 2px 16px;
-	margin-bottom: 24px;
+	gap: 12px;
+	margin-bottom: 16px;
 }
 
+/*
+ * На телефоне заголовок мельче и переносится только между словами, без дефисов.
+ * Строки выравниваются по длине, чтобы год не оставался один на второй строке
+ */
 .title {
-	grid-area: title;
-	font-size: 22px;
-	overflow-wrap: break-word;
-	hyphens: auto;
+	font-size: 18px;
+	line-height: 1.25;
+	text-wrap: balance;
 }
 
 .brand {
@@ -38,18 +38,35 @@
 }
 
 .subtitle {
-	grid-area: subtitle;
 	max-width: 60ch;
 	font-size: 14px;
 	color: var(--text-2);
 }
 
 @media (min-width: 640px) {
+	.header {
+		gap: 16px;
+		margin-bottom: 24px;
+	}
 	.title {
 		font-size: 26px;
+		line-height: 1.2;
 	}
 	.subtitle {
 		font-size: 15px;
+	}
+}
+
+/* Язык, тема и печать: на телефоне в шапке их нет, язык и тема — в диалоге настроек */
+@media (max-width: 639px) {
+	.wideOnly {
+		display: none;
+	}
+}
+
+@media (min-width: 640px) {
+	.narrowOnly {
+		display: none;
 	}
 }
 
@@ -64,7 +81,6 @@
 }
 
 .actions {
-	grid-area: actions;
 	gap: 2px;
 }
 
@@ -583,17 +599,6 @@
 	text-transform: uppercase;
 }
 
-/* На телефоне у языка остаётся только флаг, чтобы заголовку хватило места */
-@media (max-width: 639px) {
-	.langCode {
-		display: none;
-	}
-	.langWrap :global(.btn) {
-		width: 32px;
-		padding: 0;
-	}
-}
-
 /* ---------- settings dialog ---------- */
 .dialog {
 	width: min(420px, calc(100vw - 32px));
@@ -619,6 +624,19 @@
 
 .field small {
 	color: var(--text-3);
+}
+
+.themeSwitch {
+	display: flex;
+}
+
+.themeSwitch button {
+	display: inline-flex;
+	flex: 1;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 36px;
 }
 
 .check {
@@ -669,13 +687,6 @@
 	text-decoration: none;
 }
 
-/* На телефоне кнопки печати нет: печатают с компьютера, а заголовку нужно место */
-@media (max-width: 639px) {
-	.printBtn {
-		display: none;
-	}
-}
-
 @media print {
 	/* Поля листа: повторяются на каждой странице, а не только в начале и конце */
 	.page {
@@ -697,7 +708,6 @@
 		content: attr(data-print-title);
 		font-size: 20px;
 	}
-	.subtitle,
 	.spoilerToggle .chevron {
 		display: none;
 	}

@@ -49,7 +49,7 @@ export const LangSwitcher = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 	const {open, setOpen, ref} = useDropdown()
 
 	return (
-		<div class={s.langWrap} ref={ref}>
+		<div class={`${s.langWrap} ${s.wideOnly}`} ref={ref}>
 			<button
 				type="button"
 				class="btn"
@@ -99,7 +99,7 @@ export const ThemeToggle = () => {
 	return (
 		<button
 			type="button"
-			class="btn btn-icon"
+			class={`btn btn-icon ${s.wideOnly}`}
 			aria-label={dark ? t.header.themeLight : t.header.themeDark}
 			title={dark ? t.header.themeLight : t.header.themeDark}
 			onClick={() => {
@@ -135,13 +135,13 @@ export const Header = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 			<h1 class={s.title} data-print-title={printTitle ?? undefined}>
 				{title}
 			</h1>
-			<p class={s.subtitle}>{fmt(t.header.subtitle, {n: MAX_COUNTRIES})}</p>
+			{/* На телефоне язык и тема спрятаны в диалог настроек, в шапке остаётся шестерёнка */}
 			<nav class={s.actions} aria-label={t.header.settings}>
 				<LangSwitcher hrefFor={hrefFor} />
 				<ThemeToggle />
 				<button
 					type="button"
-					class={`btn btn-icon ${s.printBtn}`}
+					class={`btn btn-icon ${s.wideOnly}`}
 					aria-label={t.header.print}
 					title={t.header.print}
 					onClick={() => {
@@ -369,12 +369,13 @@ export const CountryPicker = () => {
 	)
 }
 
-export const SettingsDialog = () => {
+export const SettingsDialog = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 	const store = useStore()
 	const {t, lang} = useI18n()
 	const ref = useRef<HTMLDialogElement>(null)
 	const open = store.settingsOpen.value
 	const settings = store.settings.value
+	const theme = settings.theme
 
 	useEffect(() => {
 		const dialog = ref.current
@@ -392,24 +393,47 @@ export const SettingsDialog = () => {
 			onClick={e => e.target === ref.current && (store.settingsOpen.value = false)}
 		>
 			<h2 id="settings-title">{t.settings.title}</h2>
-			<label class={s.field}>
-				{t.settings.homeCountry}
-				<select
-					value={settings.countries[0]}
-					onChange={e => {
-						const id = (e.target as HTMLSelectElement).value
-						store.setHome(id)
-						track('home_change', {country: id})
-					}}
-				>
-					{COUNTRY_IDS.map(id => (
-						<option key={id} value={id}>
-							{localized(COUNTRIES[id]!.name, lang)}
-						</option>
-					))}
-				</select>
-				<small>{t.settings.homeHint}</small>
-			</label>
+			{/* Язык и тема здесь только на телефоне: на широком экране они в шапке */}
+			<div class={s.narrowOnly}>
+				<label class={s.field}>
+					{t.header.language}
+					<select
+						value={lang}
+						onChange={e => {
+							const next = (e.target as HTMLSelectElement).value as Lang
+							store.updateSettings({lang: next})
+							track('lang_change', {from: lang, to: next})
+							location.assign(hrefFor(next))
+						}}
+					>
+						{LANGS.map(l => (
+							<option key={l} value={l} lang={l}>
+								{LANG_NAMES[l]}
+							</option>
+						))}
+					</select>
+				</label>
+				<div class={s.field}>
+					<span id="theme-label">{t.settings.theme}</span>
+					<div class={`segmented ${s.themeSwitch}`} role="group" aria-labelledby="theme-label">
+						{(['light', 'dark'] as const).map(v => (
+							<button
+								key={v}
+								type="button"
+								aria-pressed={theme === v}
+								onClick={() => {
+									if (theme === v) return
+									store.setTheme(v)
+									track('theme_change', {theme: v})
+								}}
+							>
+								{v === 'light' ? <SunIcon /> : <MoonIcon />}
+								{t.settings[v]}
+							</button>
+						))}
+					</div>
+				</div>
+			</div>
 			<label class={s.field}>
 				{t.settings.weekStart}
 				<select

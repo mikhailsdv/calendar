@@ -16,7 +16,6 @@ const en: Dict = {
 	header: {
 		h1: 'Working calendar {year}',
 		h1Country: '{country} working calendar {year}',
-		subtitle: 'Overlay up to {n} countries, see transferred days off and plan your vacation',
 		language: 'Language',
 		themeLight: 'Switch to light theme',
 		themeDark: 'Switch to dark theme',
@@ -187,8 +186,6 @@ const en: Dict = {
 	},
 	settings: {
 		title: 'Settings',
-		homeCountry: 'Main country',
-		homeHint: 'Used for hints and for the first day of the week',
 		weekStart: 'Week starts on',
 		weekAuto: 'as in the main country',
 		monday: 'Monday',
@@ -198,6 +195,9 @@ const en: Dict = {
 		sixDay: 'six-day',
 		hoursNorm: 'Working hours per week',
 		weekNumbers: 'Show week numbers',
+		theme: 'Theme',
+		light: 'Light',
+		dark: 'Dark',
 		close: 'Done',
 	},
 	footer: {

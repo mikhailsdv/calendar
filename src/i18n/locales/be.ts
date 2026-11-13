@@ -16,7 +16,6 @@ const be: Dict = {
 	header: {
 		h1: 'Вытворчы каляндар {year}',
 		h1Country: 'Вытворчы каляндар {country} на {year} год',
-		subtitle: 'Накладзіце календары да {n} краін, паглядзіце пераносы і палічыце адпачынак',
 		language: 'Мова',
 		themeLight: 'Уключыць светлую тэму',
 		themeDark: 'Уключыць цёмную тэму',
@@ -203,8 +202,6 @@ const be: Dict = {
 	},
 	settings: {
 		title: 'Налады',
-		homeCountry: 'Асноўная краіна',
-		homeHint: 'Па ёй лічацца падказкі і пачатак тыдня',
 		weekStart: 'Тыдзень пачынаецца',
 		weekAuto: 'як у асноўнай краіне',
 		monday: 'з панядзелка',
@@ -214,6 +211,9 @@ const be: Dict = {
 		sixDay: 'шасцідзённы',
 		hoursNorm: 'Норма гадзін у тыдзень',
 		weekNumbers: 'Паказваць нумары тыдняў',
+		theme: 'Тэма',
+		light: 'Светлая',
+		dark: 'Цёмная',
 		close: 'Гатова',
 	},
 	footer: {

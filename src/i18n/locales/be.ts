@@ -24,7 +24,6 @@ const be: Dict = {
 		print: 'Раздрукаваць',
 	},
 	toolbar: {
-		compare: 'Параўнаць',
 		prevYear: 'Папярэдні год',
 		nextYear: 'Наступны год',
 		prevMonth: 'Папярэдні месяц',
@@ -37,6 +36,8 @@ const be: Dict = {
 		countries: 'Краіны',
 		countryLimit: 'Можна выбраць да {n} краін адначасова',
 		home: 'асноўная',
+		makeHome: 'зрабіць асноўнай',
+		countriesHint: 'Адзначце некалькі, каб параўнаць',
 	},
 	months: [
 		'студзень',

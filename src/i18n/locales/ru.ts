@@ -46,7 +46,6 @@ const ru = {
 		print: 'Распечатать',
 	},
 	toolbar: {
-		compare: 'Сравнить',
 		prevYear: 'Предыдущий год',
 		nextYear: 'Следующий год',
 		prevMonth: 'Предыдущий месяц',
@@ -59,6 +58,8 @@ const ru = {
 		countries: 'Страны',
 		countryLimit: 'Можно выбрать до {n} стран одновременно',
 		home: 'основная',
+		makeHome: 'сделать основной',
+		countriesHint: 'Отметьте несколько, чтобы сравнить',
 	},
 	months: [
 		'январь',

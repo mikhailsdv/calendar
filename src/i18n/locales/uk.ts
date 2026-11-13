@@ -24,7 +24,6 @@ const uk: Dict = {
 		print: 'Надрукувати',
 	},
 	toolbar: {
-		compare: 'Порівняти',
 		prevYear: 'Попередній рік',
 		nextYear: 'Наступний рік',
 		prevMonth: 'Попередній місяць',
@@ -37,6 +36,8 @@ const uk: Dict = {
 		countries: 'Країни',
 		countryLimit: 'Можна вибрати до {n} країн одночасно',
 		home: 'основна',
+		makeHome: 'зробити основною',
+		countriesHint: 'Позначте кілька, щоб порівняти',
 	},
 	months: [
 		'січень',

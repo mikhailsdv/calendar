@@ -31,29 +31,17 @@
 		}
 	},
 	"country_toggle": {
-		"description": "Страна добавлена в наложение или убрана",
+		"description": "Страна отмечена или снята в списке стран",
 		"params": {
 			"country": "id страны",
 			"action": "add | remove",
 			"count": "сколько стран стало"
 		}
 	},
-	"country_limit_hit": {
-		"description": "Попытка выбрать больше стран, чем можно наложить",
-		"params": {
-			"country": "id страны"
-		}
-	},
 	"home_change": {
-		"description": "Изменена основная страна",
+		"description": "Изменена основная страна: в списке стран или в настройках",
 		"params": {
 			"country": "id страны"
-		}
-	},
-	"compare_toggle": {
-		"description": "Включено или выключено сравнение стран",
-		"params": {
-			"state": "on | off"
 		}
 	},
 	"day_open": {

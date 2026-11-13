@@ -32,16 +32,15 @@ describe('persist', () => {
 		expect(fixed.view).toBe('year')
 		expect(fixed.countries).toEqual(['kz'])
 		expect(fixed.hoursNorm).toBe(defaults.hoursNorm)
-		expect(fixed.compare).toBe(false)
 		expect(fixed.lang).toBeNull()
 	})
 
-	it('turns comparison on for old settings with several countries', () => {
-		const old = sanitizeSettings({countries: ['ru', 'kz']}, defaults, COUNTRY_IDS)
-		expect(old.compare).toBe(true)
-		const off = sanitizeSettings({countries: ['ru', 'kz'], compare: false}, defaults, COUNTRY_IDS)
-		expect(off.compare).toBe(false)
-		expect(off.countries).toEqual(['ru', 'kz'])
+	it('keeps only the main country from old settings with comparison off', () => {
+		const on = sanitizeSettings({countries: ['ru', 'kz'], compare: true}, defaults, COUNTRY_IDS)
+		expect(on.countries).toEqual(['ru', 'kz'])
+		const off = sanitizeSettings({countries: ['kz', 'ru'], compare: false}, defaults, COUNTRY_IDS)
+		expect(off.countries).toEqual(['kz'])
+		expect('compare' in off).toBe(false)
 	})
 
 	it('reads and writes localStorage', () => {
@@ -83,14 +82,15 @@ describe('store', () => {
 	it(`limits the overlay to ${MAX_COUNTRIES} countries and keeps at least one`, () => {
 		const s = store()
 		s.updateSettings({countries: ['ru']})
-		expect(s.toggleCountry('ru')).toBe(true)
+		expect(s.toggleCountry('ru')).toBe(false)
 		expect(s.settings.value.countries).toEqual(['ru'])
-		s.updateSettings({countries: COUNTRY_IDS.slice(0, MAX_COUNTRIES)})
-		const extra = 'zz'
-		s.updateSettings({countries: [...s.settings.value.countries.slice(0, MAX_COUNTRIES - 1), 'am']})
+		expect(s.toggleCountry('kz')).toBe(true)
+		expect(s.toggleCountry('ru')).toBe(true)
+		expect(s.settings.value.countries).toEqual(['kz'])
+		s.updateSettings({countries: [...COUNTRY_IDS.slice(0, MAX_COUNTRIES - 1), 'am']})
 		expect(s.settings.value.countries).toHaveLength(MAX_COUNTRIES)
-		expect(s.toggleCountry(extra)).toBe(false)
-		expect(s.limitHit.value).toBe(true)
+		expect(s.toggleCountry('zz')).toBe(false)
+		expect(s.settings.value.countries).toHaveLength(MAX_COUNTRIES)
 	})
 
 	it('builds a vacation range from two clicks in any order', () => {
@@ -127,12 +127,11 @@ describe('store', () => {
 		expect(s.selected.value).toBeNull()
 	})
 
-	it('shows only the main country until comparison is on', () => {
+	it('shows every chosen country, the first one as the main', () => {
 		const s = store()
 		s.updateSettings({countries: ['ru', 'kz', 'by']})
-		expect(s.countries.value.map(c => c.id)).toEqual(['ru'])
-		s.setCompare(true)
 		expect(s.countries.value.map(c => c.id)).toEqual(['ru', 'kz', 'by'])
+		expect(s.home.value.id).toBe('ru')
 	})
 
 	it('moves a country to the front as the main one', () => {

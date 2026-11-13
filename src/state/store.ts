@@ -26,7 +26,6 @@ export const defaultSettings = (lang: Lang, country: string | null = null): Sett
 	theme: 'light',
 	lang: null,
 	countries: [country ?? COUNTRY_BY_LANG[lang] ?? FALLBACK_COUNTRY],
-	compare: false,
 	view: 'year',
 	weekStart: 'auto',
 	hoursNorm: 40,
@@ -57,12 +56,11 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 	const today = signal<ISODate | null>(null)
 	const yearData = signal<YearCache>(years)
 	const settingsOpen = signal(false)
-	const limitHit = signal(false)
 
-	// Без сравнения на календаре только основная страна. При шестидневке страны получают её правила
+	// При шестидневке страны получают её правила
 	const countries = computed(() => {
-		const {countries: ids, compare, workWeek} = settings.value
-		const list = (compare ? ids : ids.slice(0, 1)).map(id => COUNTRIES[id]).filter(c => c != null)
+		const {countries: ids, workWeek} = settings.value
+		const list = ids.map(id => COUNTRIES[id]).filter(c => c != null)
 		return workWeek === 6 ? list.map(withSixDayWeek) : list
 	})
 	const home = computed(() => countries.value[0] ?? COUNTRIES[COUNTRY_IDS[0]!]!)
@@ -129,27 +127,18 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 		return true
 	}
 
+	/** Добавляет страну на календарь или убирает; последнюю не убирает, сверх лимита не добавляет */
 	const toggleCountry = (id: string) => {
 		const current = settings.value.countries
 		if (current.includes(id)) {
-			if (current.length > 1) updateSettings({countries: current.filter(c => c !== id)})
-			limitHit.value = false
+			if (current.length === 1) return false
+			updateSettings({countries: current.filter(c => c !== id)})
 			return true
 		}
-		if (current.length >= MAX_COUNTRIES) {
-			limitHit.value = true
-			return false
-		}
-		limitHit.value = false
+		if (current.length >= MAX_COUNTRIES) return false
 		updateSettings({countries: [...current, id]})
 		ensureAround(year.value)
 		return true
-	}
-
-	const setCompare = (on: boolean) => {
-		limitHit.value = false
-		updateSettings({compare: on})
-		ensureAround(year.value)
 	}
 
 	const setHome = (id: string) => {
@@ -212,7 +201,6 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 		today,
 		yearData,
 		settingsOpen,
-		limitHit,
 		pageCountry,
 		countries,
 		home,
@@ -226,7 +214,6 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 		shiftMonth,
 		toggleCountry,
 		setHome,
-		setCompare,
 		setMode,
 		clickDay,
 		setRange,

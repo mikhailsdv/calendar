@@ -36,6 +36,12 @@ export const ChevronRight = (p: IconProps) => (
 	</Svg>
 )
 
+export const ChevronDown = (p: IconProps) => (
+	<Svg {...p}>
+		<path d="M6 9l6 6l6 -6" />
+	</Svg>
+)
+
 export const PrinterIcon = (p: IconProps) => (
 	<Svg {...p}>
 		<path d="M17 17h2a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h2M17 9V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v4M9 13h6a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z" />

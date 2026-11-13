@@ -9,13 +9,20 @@ import {fmt, localized, useI18n} from '../i18n'
 import {countryForm} from '../seo/title'
 import {useStore} from '../state/store'
 import {Flag, LANG_FLAG} from './Flag'
-import {ChevronLeft, ChevronRight, MoonIcon, PrinterIcon, SettingsIcon, SunIcon} from './icons'
+import {
+	ChevronDown,
+	ChevronLeft,
+	ChevronRight,
+	MoonIcon,
+	PrinterIcon,
+	SettingsIcon,
+	SunIcon,
+} from './icons'
 import s from './Layout.module.css'
 import {revealDate} from './reveal'
 
-export const LangSwitcher = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
-	const store = useStore()
-	const {lang, t} = useI18n()
+/** Выпадающее меню: закрывается по клику мимо и по Escape */
+const useDropdown = () => {
 	const [open, setOpen] = useState(false)
 	const ref = useRef<HTMLDivElement>(null)
 
@@ -32,6 +39,14 @@ export const LangSwitcher = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 			document.removeEventListener('keydown', onKey)
 		}
 	}, [open])
+
+	return {open, setOpen, ref}
+}
+
+export const LangSwitcher = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
+	const store = useStore()
+	const {lang, t} = useI18n()
+	const {open, setOpen, ref} = useDropdown()
 
 	return (
 		<div class={s.langWrap} ref={ref}>
@@ -267,73 +282,88 @@ export const Toolbar = () => {
 }
 
 /**
- * Выбор стран. По умолчанию одна страна: нажатие на чип делает её основной.
- * «Сравнить» включает наложение: чипы добавляют и убирают страны, выбор помнится в localStorage
+ * Выбор стран: кнопка с флагами открывает список с чекбоксами. Отмеченные страны — на календаре,
+ * первая из них основная. Несколько отметок — это и есть сравнение. Последнюю отметку снять нельзя
  */
-export const CountryChips = () => {
+export const CountryPicker = () => {
 	const store = useStore()
 	const {t, lang} = useI18n()
-	const {countries: saved, compare} = store.settings.value
-	const active = compare ? saved : saved.slice(0, 1)
+	const {open, setOpen, ref} = useDropdown()
+	const active = store.settings.value.countries
+	const home = active[0]!
+	const full = active.length >= MAX_COUNTRIES
+	const name = (id: string) => localized(COUNTRIES[id]!.name, lang)
 	return (
-		// Одну страну на печати не показываем: её называет заголовок
-		<div
-			class={s.chips}
-			role="group"
-			aria-label={t.toolbar.countries}
-			data-print={active.length > 1 ? undefined : 'hide'}
-		>
-			{COUNTRY_IDS.map(id => {
-				const country = COUNTRIES[id]!
-				const pressed = active.includes(id)
-				return (
-					<button
-						key={id}
-						type="button"
-						class={s.chip}
-						aria-pressed={pressed}
-						data-c={id}
-						onClick={() => {
-							if (!compare) {
-								if (pressed) return
-								store.setHome(id)
-								track('home_change', {country: id})
-								return
-							}
-							const ok = store.toggleCountry(id)
-							if (!ok) track('country_limit_hit', {country: id})
-							else
-								track('country_toggle', {
-									country: id,
-									action: pressed ? 'remove' : 'add',
-									count: store.settings.value.countries.length,
-								})
-						}}
-					>
-						<Flag code={id} />
-						{localized(country.name, lang)}
-						{compare && pressed && active[0] === id ? (
-							<span class={s.home}>· {t.toolbar.home}</span>
-						) : null}
-					</button>
-				)
-			})}
+		// На печати страны называют заголовок и легенда
+		<div class={s.countries} ref={ref} data-print="hide">
 			<button
 				type="button"
-				class={`btn btn-sm ${s.compare}`}
-				aria-pressed={compare}
-				data-print="hide"
-				onClick={() => {
-					store.setCompare(!compare)
-					track('compare_toggle', {state: compare ? 'off' : 'on'})
-				}}
+				class={`btn ${s.countryBtn}`}
+				aria-haspopup="true"
+				aria-expanded={open}
+				aria-controls="country-menu"
+				aria-label={`${t.toolbar.countries}: ${active.map(name).join(', ')}`}
+				onClick={() => setOpen(!open)}
 			>
-				{t.toolbar.compare}
-			</button>
-			{store.limitHit.value ? (
-				<span class={s.limit} role="status">
-					{fmt(t.toolbar.countryLimit, {n: MAX_COUNTRIES})}
+				<span class={s.flags}>
+					{active.map(id => (
+						<Flag key={id} code={id} />
+					))}
 				</span>
+				{name(home)}
+				{active.length > 1 ? <span class={s.more}>+{active.length - 1}</span> : null}
+				<ChevronDown class={`icon ${s.countryChevron}`} />
+			</button>
+			{open ? (
+				<div id="country-menu" class={s.countryMenu} role="group" aria-label={t.toolbar.countries}>
+					<p class={s.countryHint}>
+						{full ? fmt(t.toolbar.countryLimit, {n: MAX_COUNTRIES}) : t.toolbar.countriesHint}
+					</p>
+					<ul>
+						{COUNTRY_IDS.map(id => {
+							const checked = active.includes(id)
+							// Последнюю страну не убрать, сверх лимита не добавить
+							const locked = checked ? active.length === 1 : full
+							return (
+								<li key={id} data-c={id}>
+									<label class={s.countryOption}>
+										<input
+											type="checkbox"
+											checked={checked}
+											disabled={locked}
+											onChange={() => {
+												if (!store.toggleCountry(id)) return
+												track('country_toggle', {
+													country: id,
+													action: checked ? 'remove' : 'add',
+													count: store.settings.value.countries.length,
+												})
+											}}
+										/>
+										<Flag code={id} />
+										{name(id)}
+									</label>
+									{checked && active.length > 1 ? (
+										id === home ? (
+											<span class={s.homeTag}>{t.toolbar.home}</span>
+										) : (
+											<button
+												type="button"
+												class={s.makeHome}
+												onClick={() => {
+													store.setHome(id)
+													track('home_change', {country: id})
+												}}
+											>
+												{t.toolbar.makeHome}
+											</button>
+										)
+									) : null}
+								</li>
+							)
+						})}
+					</ul>
+				</div>
 			) : null}
 		</div>
 	)

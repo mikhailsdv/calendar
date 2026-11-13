@@ -46,30 +46,52 @@ const holidayToggles = (container: Element) => [
 
 const expanded = (button: HTMLElement) => button.getAttribute('aria-expanded') === 'true'
 
+type Queries = Awaited<ReturnType<typeof renderApp>>
+
+/** Открывает список стран и возвращает запросы внутри него */
+const openCountries = ({getByRole}: Queries) => {
+	fireEvent.click(getByRole('button', {name: /^Страны:/}))
+	return within(getByRole('group', {name: 'Страны'}))
+}
+
+const checkbox = (menu: ReturnType<typeof openCountries>, name: RegExp) =>
+	menu.getByRole<HTMLInputElement>('checkbox', {name})
+
+/** Отмеченные страны в порядке списка */
+const checkedIds = (menu: ReturnType<typeof openCountries>) =>
+	menu
+		.getAllByRole<HTMLInputElement>('checkbox')
+		.filter(c => c.checked)
+		.map(c => c.closest('li')!.dataset.c)
+
+/** Цветные точки других стран в ячейке дня */
+const dots = (container: Element, date: string) =>
+	[...cell(container, date).querySelectorAll('i')].map(i => i.dataset.c)
+
 beforeEach(() => localStorage.clear())
 afterEach(() => cleanup())
 
 describe('calendar', () => {
 	it('selects only the detected country on the first visit', async () => {
-		const {getByRole} = await renderApp()
-		const chips = within(getByRole('group', {name: 'Страны'}))
-		const active = chips
-			.getAllByRole('button')
-			.filter(b => b.getAttribute('aria-pressed') === 'true')
-		expect(active.map(b => b.textContent)).toEqual(['Россия'])
+		const app = await renderApp()
+		expect(app.getByRole('button', {name: /^Страны:/}).textContent).toBe('Россия')
+		const menu = openCountries(app)
+		expect(checkedIds(menu)).toEqual(['ru'])
+		// Последнюю страну снять нельзя
+		expect(checkbox(menu, /Россия/).disabled).toBe(true)
 		expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
 	})
 
 	it('opens a country page with that country first, without saving it', async () => {
 		localStorage.setItem(STORAGE_KEY, JSON.stringify({countries: ['ru', 'by']}))
-		const {getByRole, container} = await renderApp('ru', 'kz')
-		const chips = within(getByRole('group', {name: 'Страны'}))
-		const active = chips
-			.getAllByRole('button')
-			.filter(b => b.getAttribute('aria-pressed') === 'true')
-		// Чипы идут в обычном порядке стран, основной стала страна из адреса
-		expect(active.map(b => b.dataset.c).filter(Boolean)).toEqual(['ru', 'kz', 'by'])
-		expect(chips.getByRole('button', {name: /Казахстан/}).textContent).toContain('основная')
+		const app = await renderApp('ru', 'kz')
+		const {container} = app
+		// Кнопка называет основную страну и число остальных
+		expect(app.getByRole('button', {name: /^Страны:/}).textContent).toBe('Казахстан+2')
+		const menu = openCountries(app)
+		// Список идёт в обычном порядке стран, основной стала страна из адреса
+		expect(checkedIds(menu)).toEqual(['ru', 'kz', 'by'])
+		expect(checkbox(menu, /Казахстан/).closest('li')!.textContent).toContain('основная')
 		expect(container.querySelector('h1')?.textContent).toBe(
 			'Производственный календарь Казахстана на 2027 год'
 		)
@@ -127,41 +149,43 @@ describe('calendar', () => {
 		expect(cell(container, '2027-05-06').dataset.range).toBeUndefined()
 	})
 
-	it('toggles countries and keeps at least one', async () => {
+	it('toggles countries in the list', async () => {
 		saveAllCountries()
-		const {container, getByRole} = await renderApp()
-		const chip = within(getByRole('group', {name: 'Страны'})).getByRole('button', {
-			name: /Беларусь/,
-		})
-		expect(chip.getAttribute('aria-pressed')).toBe('true')
-		fireEvent.click(chip)
-		expect(chip.getAttribute('aria-pressed')).toBe('false')
-		expect([...cell(container, '2027-05-10').querySelectorAll('i')].map(i => i.dataset.c)).toEqual([
-			'kz',
-		])
+		const app = await renderApp()
+		const menu = openCountries(app)
+		const by = checkbox(menu, /Беларусь/)
+		expect(by.checked).toBe(true)
+		fireEvent.click(by)
+		expect(by.checked).toBe(false)
+		expect(dots(app.container, '2027-05-10')).toEqual(['kz'])
 	})
 
-	it('compares countries only after «Сравнить» and remembers the choice', async () => {
-		const {container, getByRole} = await renderApp()
-		const chips = within(getByRole('group', {name: 'Страны'}))
-		// Без сравнения чип меняет основную страну, а не добавляет вторую
-		fireEvent.click(chips.getByRole('button', {name: /Казахстан/}))
-		expect(cell(container, '2027-01-05').querySelectorAll('i')).toHaveLength(0)
-		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries[0]).toBe('kz')
-		// Прежняя основная страна осталась в списке и появляется при сравнении
-		fireEvent.click(chips.getByRole('button', {name: 'Сравнить'}))
+	it('compares checked countries, switches the main one and keeps the last', async () => {
+		const app = await renderApp()
+		const {container} = app
+		const menu = openCountries(app)
+		fireEvent.click(checkbox(menu, /Казахстан/))
+		// Россия основная: 10 мая у неё перенос, у Казахстана тоже — точка Казахстана
+		expect(dots(container, '2027-05-10')).toEqual(['kz'])
+		fireEvent.click(menu.getByRole('button', {name: 'сделать основной'}))
 		// 5 января 2027 в России новогодние каникулы, а в Казахстане рабочий день: точка России
-		expect([...cell(container, '2027-01-05').querySelectorAll('i')].map(i => i.dataset.c)).toEqual([
-			'ru',
-		])
-		fireEvent.click(chips.getByRole('button', {name: /Беларусь/}))
-		const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
-		expect(saved.compare).toBe(true)
-		expect(saved.countries).toEqual(['kz', 'ru', 'by'])
-		// Выключили сравнение: на календаре снова одна страна, но выбор сохранён
-		fireEvent.click(chips.getByRole('button', {name: 'Сравнить'}))
-		expect(cell(container, '2027-01-05').querySelectorAll('i')).toHaveLength(0)
-		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries).toEqual(['kz', 'ru', 'by'])
+		expect(dots(container, '2027-01-05')).toEqual(['ru'])
+		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries).toEqual(['kz', 'ru'])
+		// Сняли Россию: осталась одна страна, и её уже не снять
+		fireEvent.click(checkbox(menu, /Россия/))
+		expect(dots(container, '2027-01-05')).toHaveLength(0)
+		expect(checkbox(menu, /Казахстан/).disabled).toBe(true)
+		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries).toEqual(['kz'])
+	})
+
+	it('closes the country list on a click outside but not inside', async () => {
+		const app = await renderApp()
+		const menu = openCountries(app)
+		fireEvent.pointerDown(checkbox(menu, /Армения/))
+		expect(app.queryByRole('group', {name: 'Страны'})).not.toBeNull()
+		fireEvent.pointerDown(document.body)
+		expect(app.queryByRole('group', {name: 'Страны'})).toBeNull()
+		expect(app.getByRole('button', {name: /^Страны:/}).getAttribute('aria-expanded')).toBe('false')
 	})
 
 	it('names near days in words', async () => {
@@ -189,14 +213,15 @@ describe('calendar', () => {
 
 	it('collapses holiday lists from the third country on', async () => {
 		saveAllCountries()
-		const {container, getByRole} = await renderApp()
-		const chips = within(getByRole('group', {name: 'Страны'}))
+		const app = await renderApp()
+		const {container} = app
 		expect(holidayToggles(container).map(expanded)).toEqual([true, true, false, false, false])
-		fireEvent.click(chips.getByRole('button', {name: /Армения/}))
-		fireEvent.click(chips.getByRole('button', {name: /Украина/}))
-		fireEvent.click(chips.getByRole('button', {name: /Беларусь/}))
+		const menu = openCountries(app)
+		fireEvent.click(checkbox(menu, /Армения/))
+		fireEvent.click(checkbox(menu, /Украина/))
+		fireEvent.click(checkbox(menu, /Беларусь/))
 		expect(holidayToggles(container)).toHaveLength(0)
-		fireEvent.click(chips.getByRole('button', {name: /Армения/}))
+		fireEvent.click(checkbox(menu, /Армения/))
 		expect(holidayToggles(container).map(expanded)).toEqual([true, true, false])
 	})
 

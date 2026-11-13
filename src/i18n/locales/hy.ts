@@ -24,7 +24,6 @@ const hy: Dict = {
 		print: 'Տպել',
 	},
 	toolbar: {
-		compare: 'Համեմատել',
 		prevYear: 'Նախորդ տարի',
 		nextYear: 'Հաջորդ տարի',
 		prevMonth: 'Նախորդ ամիս',
@@ -37,6 +36,8 @@ const hy: Dict = {
 		countries: 'Երկրներ',
 		countryLimit: 'Միաժամանակ կարելի է ընտրել մինչև {n} երկիր',
 		home: 'հիմնական',
+		makeHome: 'դարձնել հիմնական',
+		countriesHint: 'Համեմատելու համար նշեք մի քանիսը',
 	},
 	months: [
 		'հունվար',

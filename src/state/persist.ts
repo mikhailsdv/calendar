@@ -8,10 +8,8 @@ export interface Settings {
 	theme: Theme
 	/** Только явно выбранный язык; автоопределение сюда не пишет */
 	lang: Lang | null
-	/** Выбранные для сравнения страны по порядку, первая — основная. Помнятся и при выключенном сравнении */
+	/** Страны на календаре по порядку, первая — основная. Больше одной — значит, идёт сравнение */
 	countries: string[]
-	/** Сравнение включено: на календаре все выбранные страны, иначе только основная */
-	compare: boolean
 	view: View
 	weekStart: 'auto' | 1 | 7
 	hoursNorm: 40 | 36 | 24
@@ -33,17 +31,17 @@ export const sanitizeSettings = (
 	knownCountries: string[]
 ): Settings => {
 	const value = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {}
-	const countries = Array.isArray(value.countries)
+	const known = Array.isArray(value.countries)
 		? [...new Set(value.countries.filter(id => knownCountries.includes(id as string)))]
 		: []
+	// Старые настройки с выключенным сравнением: на календаре была только основная страна
+	const countries = value.compare === false ? known.slice(0, 1) : known
 	return {
 		theme: pick(value.theme, ['light', 'dark'] as const, defaults.theme),
 		lang: isLang(value.lang) ? value.lang : defaults.lang,
 		countries: countries.length
 			? (countries as string[]).slice(0, MAX_COUNTRIES)
 			: defaults.countries,
-		// Старые настройки без флага: несколько стран значит, что человек уже сравнивал
-		compare: typeof value.compare === 'boolean' ? value.compare : countries.length > 1,
 		view: pick(value.view, VIEWS, defaults.view),
 		weekStart: pick(value.weekStart, ['auto', 1, 7] as const, defaults.weekStart),
 		hoursNorm: pick(value.hoursNorm, [40, 36, 24] as const, defaults.hoursNorm),

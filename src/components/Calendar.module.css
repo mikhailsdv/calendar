@@ -295,7 +295,7 @@
 }
 
 .dots i,
-.legendDots i {
+.legendCountry i {
 	width: 4px;
 	height: 4px;
 	border-radius: 50%;
@@ -612,8 +612,9 @@
 
 .legend li {
 	display: inline-flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 6px;
+	gap: 4px 8px;
 	list-style: none;
 }
 
@@ -632,12 +633,13 @@
 	background: var(--off-bg);
 }
 
-.legendDots {
+.legendCountry {
 	display: inline-flex;
-	gap: 2px;
+	align-items: center;
+	gap: 4px;
 }
 
-.legendDots i {
+.legendCountry i {
 	width: 6px;
 	height: 6px;
 }

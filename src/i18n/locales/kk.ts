@@ -24,7 +24,6 @@ const kk: Dict = {
 		print: 'Басып шығару',
 	},
 	toolbar: {
-		compare: 'Салыстыру',
 		prevYear: 'Алдыңғы жыл',
 		nextYear: 'Келесі жыл',
 		prevMonth: 'Алдыңғы ай',
@@ -37,6 +36,8 @@ const kk: Dict = {
 		countries: 'Елдер',
 		countryLimit: 'Бір уақытта {n} елге дейін таңдауға болады',
 		home: 'негізгі',
+		makeHome: 'негізгі ету',
+		countriesHint: 'Салыстыру үшін бірнешеуін белгілеңіз',
 	},
 	months: [
 		'қаңтар',

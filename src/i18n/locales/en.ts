@@ -24,7 +24,6 @@ const en: Dict = {
 		print: 'Print',
 	},
 	toolbar: {
-		compare: 'Compare',
 		prevYear: 'Previous year',
 		nextYear: 'Next year',
 		prevMonth: 'Previous month',
@@ -37,6 +36,8 @@ const en: Dict = {
 		countries: 'Countries',
 		countryLimit: 'You can pick up to {n} countries at once',
 		home: 'main',
+		makeHome: 'make main',
+		countriesHint: 'Check several to compare',
 	},
 	months: [
 		'January',

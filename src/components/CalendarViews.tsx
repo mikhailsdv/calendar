@@ -626,13 +626,15 @@ export const Legend = () => {
 					<span class={`${s.swatch} ${s.swatchOff}`} aria-hidden="true" />
 					{fmt(t.legend.off, {country: localized(home.name, lang)})}
 				</li>
+				{/* Цвет точки у каждой страны подписан: на экране и на печати это единственная расшифровка */}
 				<li>
-					<span class={s.legendDots} aria-hidden="true">
-						{others.map(c => (
-							<i key={c.id} data-c={c.id} />
-						))}
-					</span>
-					{t.legend.other}
+					{t.legend.other}:
+					{others.map(c => (
+						<span key={c.id} class={s.legendCountry}>
+							<i data-c={c.id} aria-hidden="true" />
+							{localized(c.name, lang)}
+						</span>
+					))}
 				</li>
 			</ul>
 		</div>

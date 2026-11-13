@@ -12,7 +12,7 @@ import {calendarTitle, countryForm, countryTitle} from '../seo/title'
 import {loadSettings, saveSettings} from '../state/persist'
 import {useStore} from '../state/store'
 import {CalendarArea, Legend} from './CalendarViews'
-import {CountryPicker, Footer, Header, hrefForLang, SettingsDialog, Toolbar} from './Chrome'
+import {Footer, Header, hrefForLang, SettingsDialog, Toolbar} from './Chrome'
 import s from './Layout.module.css'
 import {Panel} from './Panel'
 import {CompareSection, HolidaysSection, RulesSection} from './Sections'
@@ -123,7 +123,6 @@ export const CalendarPage = ({
 		<div class={s.page}>
 			<Header hrefFor={hrefFor} />
 			<Toolbar />
-			<CountryPicker />
 			<main>
 				<div class={s.layout}>
 					<div class={s.calendarCol}>

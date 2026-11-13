@@ -115,9 +115,10 @@
 	grid-template-areas:
 		'views views'
 		'period period'
-		'modes today';
+		'modes today'
+		'countries countries';
 	gap: 8px;
-	margin-bottom: 12px;
+	margin-bottom: 16px;
 }
 
 .period {
@@ -225,7 +226,8 @@
 		grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
 		grid-template-areas:
 			'period today'
-			'views modes';
+			'views modes'
+			'countries countries';
 	}
 }
 
@@ -252,8 +254,8 @@
 
 /* ---------- выбор стран ---------- */
 .countries {
+	grid-area: countries;
 	position: relative;
-	margin-bottom: 16px;
 }
 
 .countryBtn {

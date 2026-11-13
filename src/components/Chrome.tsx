@@ -274,6 +274,7 @@ export const Toolbar = () => {
 					</button>
 				))}
 			</div>
+			<CountryPicker />
 			<button type="button" class={`btn ${s.today}`} onClick={goToday}>
 				{t.toolbar.today}
 			</button>

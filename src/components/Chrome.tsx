@@ -317,9 +317,7 @@ export const CountryPicker = () => {
 			</button>
 			{open ? (
 				<div id="country-menu" class={s.countryMenu} role="group" aria-label={t.toolbar.countries}>
-					<p class={s.countryHint}>
-						{t.toolbar.countriesHint}
-					</p>
+					<p class={s.countryHint}>{t.toolbar.countriesHint}</p>
 					<ul>
 						{COUNTRY_IDS.map(id => {
 							const checked = active.includes(id)

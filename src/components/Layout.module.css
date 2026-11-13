@@ -587,12 +587,25 @@
 }
 
 @media print {
+	/* Поля листа: повторяются на каждой странице, а не только в начале и конце */
 	.page {
 		max-width: none;
-		padding: 0;
+		padding: 8mm 10mm;
+		-webkit-box-decoration-break: clone;
+		box-decoration-break: clone;
 	}
 	.header {
-		margin-bottom: 8px;
+		margin-bottom: 6px;
+	}
+	.title {
+		font-size: 20px;
+	}
+	.title[data-print-title] {
+		font-size: 0;
+	}
+	.title[data-print-title]::after {
+		content: attr(data-print-title);
+		font-size: 20px;
 	}
 	.subtitle,
 	.chip[aria-pressed='false'],
@@ -603,7 +616,7 @@
 	}
 	/* Активные страны печатаются как легенда цветов */
 	.chips {
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 	}
 	.chip {
 		min-height: 24px;
@@ -614,5 +627,44 @@
 	.layout + .section {
 		break-before: page;
 		margin-top: 0;
+	}
+	/* Разделы под календарём: мельче шрифт и меньше отступы */
+	.section {
+		margin-top: 16px;
+	}
+	.section > h2 {
+		margin-bottom: 6px;
+	}
+	.countryBlock,
+	.countryBlock.spoiler {
+		margin-top: 10px;
+	}
+	.countryTitle {
+		margin-bottom: 4px;
+		font-size: 12px;
+	}
+	.details {
+		margin-top: 8px;
+	}
+	.details .spoilerToggle {
+		font-size: 12px;
+	}
+	.spoilerBody {
+		padding-top: 4px;
+	}
+	.muted,
+	.sources {
+		font-size: 10px;
+	}
+	.rules {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 10px 16px;
+	}
+	.rules ul {
+		margin-top: 2px;
+		font-size: 10px;
+	}
+	.rules li + li {
+		margin-top: 1px;
 	}
 }

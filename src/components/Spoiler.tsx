@@ -38,6 +38,8 @@ interface Props {
 	heading?: boolean
 	children: ComponentChildren
 	class?: string
+	/** Не печатать блок целиком */
+	printHide?: boolean
 }
 
 /**
@@ -52,6 +54,7 @@ export const Spoiler = ({
 	heading,
 	children,
 	class: className,
+	printHide,
 }: Props) => {
 	const bodyId = useId()
 	const bodyRef = useRef<HTMLDivElement>(null)
@@ -125,7 +128,11 @@ export const Spoiler = ({
 	)
 
 	return (
-		<div class={`${s.spoiler} ${className ?? ''}`} data-expanded={expanded ? '' : undefined}>
+		<div
+			class={`${s.spoiler} ${className ?? ''}`}
+			data-expanded={expanded ? '' : undefined}
+			data-print={printHide ? 'hide' : undefined}
+		>
 			{heading ? <h3 class={s.spoilerHeading}>{toggle}</h3> : toggle}
 			<div
 				ref={bodyRef}

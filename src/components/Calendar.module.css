@@ -656,17 +656,46 @@
 	.quarter {
 		break-inside: avoid;
 	}
+	.monthHead {
+		padding: 3px 8px;
+		font-size: 12px;
+	}
+	.monthHead svg {
+		width: 13px;
+		height: 13px;
+	}
+	.miniGrid {
+		gap: 1px 2px;
+		padding: 3px 4px;
+	}
+	.wd {
+		font-size: 10px;
+		line-height: 14px;
+	}
 	.monthTotals {
 		padding: 2px;
+	}
+	.monthTotals dd {
+		font-size: 12px;
 	}
 	.monthCard,
 	.monthView,
 	.legend {
 		break-inside: avoid;
 	}
+	/* Высота ячейки подобрана так, чтобы четыре квартала с шапкой и легендой влезли на первый лист */
 	.mini {
 		aspect-ratio: auto;
-		height: 22px;
+		height: 20px;
+		padding-bottom: 4px;
+		font-size: 11px;
+	}
+	.mini .dots {
+		bottom: 0;
+	}
+	.legend {
+		margin-top: 6px;
+		font-size: 11px;
 	}
 	.cell.today .dayNum {
 		background: none;

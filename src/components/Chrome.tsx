@@ -103,10 +103,22 @@ export const Header = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 	const {t, lang} = useI18n()
 	const year = store.year.value
 	const form = countryForm(COUNTRIES[store.pageCountry.value ?? ''], lang)
+	const title = form ? fmt(t.header.h1Country, {country: form, year}) : fmt(t.header.h1, {year})
+	// Чип единственной страны на печати скрыт, поэтому страну называет заголовок.
+	// Печатный вариант — в атрибуте, чтобы текст h1 для поисковиков не менялся
+	const countries = store.countries.value
+	const home = countries[0]!
+	const printTitle =
+		!form && countries.length === 1
+			? fmt(t.header.h1Country, {
+					country: home.pages[lang] ?? localized(home.name, lang),
+					year,
+				})
+			: null
 	return (
 		<header class={s.header}>
-			<h1 class={s.title}>
-				{form ? fmt(t.header.h1Country, {country: form, year}) : fmt(t.header.h1, {year})}
+			<h1 class={s.title} data-print-title={printTitle ?? undefined}>
+				{title}
 			</h1>
 			<p class={s.subtitle}>{fmt(t.header.subtitle, {n: MAX_COUNTRIES})}</p>
 			<nav class={s.actions} aria-label={t.header.settings}>
@@ -264,7 +276,13 @@ export const CountryChips = () => {
 	const {countries: saved, compare} = store.settings.value
 	const active = compare ? saved : saved.slice(0, 1)
 	return (
-		<div class={s.chips} role="group" aria-label={t.toolbar.countries}>
+		// Одну страну на печати не показываем: её называет заголовок
+		<div
+			class={s.chips}
+			role="group"
+			aria-label={t.toolbar.countries}
+			data-print={active.length > 1 ? undefined : 'hide'}
+		>
 			{COUNTRY_IDS.map(id => {
 				const country = COUNTRIES[id]!
 				const pressed = active.includes(id)
@@ -304,6 +322,7 @@ export const CountryChips = () => {
 				type="button"
 				class={`btn btn-sm ${s.compare}`}
 				aria-pressed={compare}
+				data-print="hide"
 				onClick={() => {
 					store.setCompare(!compare)
 					track('compare_toggle', {state: compare ? 'off' : 'on'})

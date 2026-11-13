@@ -124,6 +124,8 @@ export const CompareSection = () => {
 					track('spoiler_toggle', {section: 'monthly', state: next ? 'open' : 'close'})
 				}}
 				summary={t.compare.monthly}
+				// При одной стране помесячные итоги уже напечатаны под месяцами календаря
+				printHide={stats.length === 1}
 			>
 				<div class="table-wrap">
 					<table class="table">

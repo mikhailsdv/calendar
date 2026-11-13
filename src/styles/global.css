@@ -424,9 +424,10 @@ input[type='checkbox']:checked::before {
 	}
 }
 
+/* Без полей у листа браузер не печатает колонтитулы с датой и заголовком; отступы задаёт .page */
 @page {
 	size: A4;
-	margin: 12mm;
+	margin: 0;
 }
 
 /* Печать: фоны красных дней и цвета стран сохраняются, интерактивные элементы скрыты */
@@ -461,5 +462,19 @@ input[type='checkbox']:checked::before {
 	}
 	tr {
 		break-inside: avoid;
+	}
+	h2 {
+		font-size: 15px;
+	}
+	.table {
+		font-size: 10px;
+		line-height: 1.3;
+	}
+	.table th {
+		font-size: 10px;
+	}
+	.table th,
+	.table td {
+		padding: 2px 8px;
 	}
 }

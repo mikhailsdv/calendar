@@ -23,13 +23,46 @@ export interface DayInfo {
 	noData: boolean
 }
 
+/**
+ * Шестидневка: выходной только воскресенье. Переносы по постановлению рассчитаны на пятидневку,
+ * поэтому не действуют. Праздник на субботе не переносится — суббота и так рабочая;
+ * праздник на воскресенье переносится на следующий рабочий день, как по закону
+ */
+export const withSixDayWeek = (country: Country): Country => ({
+	...country,
+	week: {...country.week, weekend: country.week.weekend.filter(d => d !== 6)},
+	sixDay: {weekend: country.week.weekend},
+})
+
+/** Та же страна на пятидневке: по ней считается норма часов (приказ Минздравсоцразвития № 588н) */
+const fiveDayWeek = (country: Country): Country =>
+	country.sixDay
+		? {...country, week: {...country.week, weekend: country.sixDay.weekend}, sixDay: undefined}
+		: country
+
+const sixDayEntry = (country: Country, entry: DayEntry | undefined): DayEntry | undefined => {
+	if (!entry?.transfer) return entry
+	if (entry.type === 'dayoff') {
+		const from = entry.transfer.from
+		const keep =
+			entry.basis === 'weekend-holiday-rule' &&
+			from != null &&
+			country.week.weekend.includes(isoWeekday(from))
+		return keep ? entry : undefined
+	}
+	if (entry.type === 'workday')
+		return entry.shortBy ? {type: 'workday', shortBy: entry.shortBy} : undefined
+	return entry
+}
+
 export const resolveDay = (
 	country: Country,
 	year: YearData | undefined,
 	date: ISODate
 ): DayInfo => {
 	const weekend = country.week.weekend.includes(isoWeekday(date))
-	const entry = year?.days[date]
+	const raw = year?.days[date]
+	const entry = country.sixDay ? sixDayEntry(country, raw) : raw
 	const base = {date, weekend, entry, shortBy: entry?.shortBy ?? 0, noData: !year}
 	switch (entry?.type) {
 		case 'holiday':
@@ -96,7 +129,8 @@ const emptyTotals = (): PeriodTotals => ({
 	hours: Object.fromEntries(NORMS.map(n => [String(n), 0])),
 })
 
-const addDay = (totals: PeriodTotals, country: Country, info: DayInfo) => {
+/** hoursInfo — день по пятидневке: норма часов при шестидневке такая же */
+const addDay = (totals: PeriodTotals, country: Country, info: DayInfo, hoursInfo = info) => {
 	if (info.off) totals.offdays++
 	else totals.workdays++
 	if (info.kind === 'holiday') {
@@ -105,7 +139,7 @@ const addDay = (totals: PeriodTotals, country: Country, info: DayInfo) => {
 	}
 	for (const norm of NORMS) {
 		const key = String(norm)
-		const hours = dayHours(country, info, norm)
+		const hours = dayHours(country, hoursInfo, norm)
 		const prev = totals.hours[key]
 		totals.hours[key] = hours == null || prev == null ? null : prev + hours
 	}
@@ -123,14 +157,34 @@ const roundHours = (totals: PeriodTotals) => {
 export const yearTotals = (country: Country, data: YearData | undefined, year: number) => {
 	const total = emptyTotals()
 	const months = Array.from({length: 12}, emptyTotals)
+	const fiveDay = fiveDayWeek(country)
 	for (let m = 1; m <= 12; m++) {
 		for (let d = 1; d <= daysInMonth(year, m); d++) {
-			const info = resolveDay(country, data, toISO(year, m, d))
-			addDay(total, country, info)
-			addDay(months[m - 1]!, country, info)
+			const date = toISO(year, m, d)
+			const info = resolveDay(country, data, date)
+			const hoursInfo = fiveDay === country ? info : resolveDay(fiveDay, data, date)
+			addDay(total, country, info, hoursInfo)
+			addDay(months[m - 1]!, country, info, hoursInfo)
 		}
 	}
 	return {total: roundHours(total), months: months.map(roundHours)}
+}
+
+/** Сумма итогов за несколько месяцев, например квартал */
+export const sumTotals = (list: PeriodTotals[]): PeriodTotals => {
+	const total = emptyTotals()
+	for (const item of list) {
+		total.workdays += item.workdays
+		total.offdays += item.offdays
+		total.holidays += item.holidays
+		total.holidaysOnWeekend += item.holidaysOnWeekend
+		for (const key of Object.keys(total.hours)) {
+			const prev = total.hours[key]
+			const value = item.hours[key]
+			total.hours[key] = prev == null || value == null ? null : prev + value
+		}
+	}
+	return roundHours(total)
 }
 
 /** Рабочие дни строго после from и до to включительно */

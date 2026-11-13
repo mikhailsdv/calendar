@@ -42,18 +42,6 @@ export const PrinterIcon = (p: IconProps) => (
 	</Svg>
 )
 
-export const LinkIcon = (p: IconProps) => (
-	<Svg {...p}>
-		<path d="M9 15l6-6M11 6l.463-.536a5 5 0 0 1 7.071 7.072l-.534.464M13 18l-.397.534a5.068 5.068 0 0 1-7.127 0a4.972 4.972 0 0 1 0-7.071l.524-.463" />
-	</Svg>
-)
-
-export const CheckIcon = (p: IconProps) => (
-	<Svg {...p}>
-		<path d="M5 12l5 5l10-10" />
-	</Svg>
-)
-
 export const PointerIcon = (p: IconProps) => (
 	<Svg {...p}>
 		<path d="M7.904 17.563a1.2 1.2 0 0 0 2.228 .308l2.09-3.093l4.907 4.907a1.067 1.067 0 0 0 1.509 0l1.047-1.047a1.067 1.067 0 0 0 0-1.509l-4.907-4.907l3.113-2.09a1.2 1.2 0 0 0-.309-2.228l-13.582-3.904l3.904 13.563z" />
@@ -83,24 +71,6 @@ export const SettingsIcon = (p: IconProps) => (
 export const CloseIcon = (p: IconProps) => (
 	<Svg {...p}>
 		<path d="M18 6L6 18M6 6l12 12" />
-	</Svg>
-)
-
-export const SparklesIcon = (p: IconProps) => (
-	<Svg {...p}>
-		<path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2-2a2 2 0 0 1-2-2a2 2 0 0 1-2 2zM16 6a2 2 0 0 1 2 2a2 2 0 0 1 2-2a2 2 0 0 1-2-2a2 2 0 0 1-2 2zM9 18a6 6 0 0 1 6-6a6 6 0 0 1-6-6a6 6 0 0 1-6 6a6 6 0 0 1 6 6z" />
-	</Svg>
-)
-
-export const MinusIcon = (p: IconProps) => (
-	<Svg {...p}>
-		<path d="M5 12h14" />
-	</Svg>
-)
-
-export const PlusIcon = (p: IconProps) => (
-	<Svg {...p}>
-		<path d="M12 5v14M5 12h14" />
 	</Svg>
 )
 

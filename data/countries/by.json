@@ -42,7 +42,6 @@
 		"unit": "calendar",
 		"pay": {
 			"days": "charged",
-			"divisor": 29.6,
 			"source": "https://ilex.by/uchityvaem-izmeneniya-pri-raschete-otpusknyh-v-2023-g/"
 		},
 		"minDays": 24,

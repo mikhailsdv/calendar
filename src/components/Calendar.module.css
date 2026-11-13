@@ -3,26 +3,122 @@
 }
 
 /* ---------- year ---------- */
+/* Год по кварталам: в строке три месяца одного квартала, итоги квартала в заголовке.
+   Уже 720 px месяцы идут по одному на всю ширину, сразу без промежуточных двух в ряд */
 .yearGrid {
 	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px;
+	gap: 20px;
+}
+
+.quarterHead {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 4px 16px;
+	margin-bottom: 8px;
+	padding: 0 2px;
+}
+
+.quarterHead h3 {
+	font-size: 17px;
+	font-weight: 650;
+	letter-spacing: -0.01em;
+}
+
+.quarterMonths {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 6px;
 }
 
 @media (min-width: 640px) {
 	.yearGrid {
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 28px;
+	}
+	.quarterMonths {
+		gap: 12px;
+	}
+}
+
+@media (min-width: 1024px) {
+	.quarterMonths {
 		gap: 16px;
 	}
 }
 
-@media (min-width: 1240px) {
-	.yearGrid {
-		grid-template-columns: repeat(4, minmax(0, 1fr));
-	}
+/* Итоги: значение крупно, подпись мелко. В заголовке квартала — в строку, под месяцем — столбиками */
+.quarterTotals,
+.monthTotals {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
 }
 
+.quarterTotals dd,
+.monthTotals dd {
+	margin: 0;
+	font-weight: 600;
+	color: var(--text);
+}
+
+.quarterTotals dt,
+.monthTotals dt {
+	color: var(--text-3);
+}
+
+.quarterTotals [data-k='off'] dd,
+.monthTotals [data-k='off'] dd {
+	color: var(--off-text);
+}
+
+.quarterTotals {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2px 14px;
+	font-size: 14px;
+}
+
+.quarterTotals div {
+	display: flex;
+	flex-direction: row-reverse;
+	align-items: baseline;
+	gap: 4px;
+}
+
+.quarterTotals dt {
+	font-size: 12px;
+}
+
+.monthTotals {
+	display: grid;
+	align-items: center;
+	grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+	padding: 5px 4px 6px;
+	border-top: 1px solid var(--border);
+	text-align: center;
+	line-height: 1.15;
+}
+
+.monthTotals div {
+	display: flex;
+	flex-direction: column-reverse;
+	min-width: 0;
+}
+
+.monthTotals dd {
+	font-size: 13px;
+}
+
+.monthTotals dt {
+	font-size: 10px;
+}
+
+/* Строки карточки (шапка, сетка, итоги) общие для квартала: итоги стоят на одной линии и одной высоты, даже если в месяце 5 недель, а не 6 */
 .monthCard {
+	display: grid;
+	grid-row: span 3;
+	grid-template-rows: subgrid;
+	gap: 0;
 	border: 1px solid var(--border);
 	border-radius: var(--radius);
 	overflow: hidden;
@@ -68,6 +164,7 @@
 
 .miniGrid {
 	display: grid;
+	align-content: start;
 	grid-template-columns: repeat(7, minmax(0, 1fr));
 	gap: 2px;
 	padding: 6px;
@@ -102,8 +199,11 @@
 	-webkit-tap-highlight-color: transparent;
 }
 
+/* В годовом виде число стоит ровно по центру ячейки */
 .mini {
 	aspect-ratio: 1 / 1;
+	justify-content: center;
+	align-items: center;
 	font-size: 12px;
 	line-height: 1;
 }
@@ -132,6 +232,7 @@
 	font-weight: 700;
 }
 
+/* Сегодня: число в акцентном кружке с двумя мягкими волнами */
 .cell.today {
 	z-index: 1;
 }
@@ -139,29 +240,20 @@
 .cell.today .dayNum {
 	position: relative;
 	isolation: isolate;
+	display: grid;
+	place-items: center;
 	background: var(--accent);
 	color: var(--on-accent);
 	font-weight: 600;
 }
 
-/* Кружок «сегодня» ровно круглый во всех видах: в годовом чуть крупнее числа, в месячном — по размеру шрифта */
-.cell.big.today .dayNum {
-	display: grid;
-	place-items: center;
+/* В годовом виде число по центру, поэтому кружок вокруг него не сдвигает цифру */
+.mini.today .dayNum {
 	width: 2em;
 	height: 2em;
 	padding: 0;
 }
 
-.mini.today .dayNum {
-	display: grid;
-	place-items: center;
-	width: 2.2em;
-	height: 2.2em;
-	padding: 0;
-}
-
-/* Две мягкие волны расходятся от сегодняшней даты */
 .cell.today .dayNum::before,
 .cell.today .dayNum::after {
 	content: '';
@@ -185,7 +277,7 @@
 		opacity: 0.3;
 	}
 	100% {
-		transform: scale(1.9);
+		transform: scale(1.8);
 		opacity: 0;
 	}
 }
@@ -210,6 +302,65 @@
 	background: var(--c);
 }
 
+/* Узкий экран: месяцы квартала друг под другом. Заголовок квартала с итогами прилипает к верху,
+   пока листаешь его месяцы, поэтому всегда видно, какой это квартал */
+@media screen and (max-width: 719px) {
+	.quarterMonths {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 12px;
+	}
+	.monthCard {
+		grid-row: auto;
+		grid-template-rows: none;
+	}
+	.quarterHead {
+		position: sticky;
+		top: 0;
+		z-index: 2;
+		padding: 10px 2px 8px;
+		border-bottom: 1px solid var(--border);
+		background: var(--bg);
+		/* Фон шапки на всю ширину экрана, а не только колонки */
+		box-shadow: 0 0 0 100vmax var(--bg);
+		clip-path: inset(0 -100vmax);
+	}
+	.quarterHead h3 {
+		font-size: 16px;
+	}
+	.quarterTotals {
+		gap: 2px 12px;
+		font-size: 13px;
+	}
+	.quarterTotals dt {
+		font-size: 11px;
+	}
+	.monthHead {
+		padding: 8px 12px;
+	}
+	.miniGrid {
+		gap: 3px;
+		padding: 8px;
+	}
+	.wd {
+		font-size: 12px;
+		line-height: 22px;
+	}
+	.mini {
+		aspect-ratio: auto;
+		height: 40px;
+		font-size: 15px;
+	}
+	.monthTotals {
+		padding: 8px 6px 10px;
+	}
+	.monthTotals dd {
+		font-size: 16px;
+	}
+	.monthTotals dt {
+		font-size: 11px;
+	}
+}
+
 /* Наведение стоит до состояний выбора, иначе рамка выбранного дня появляется, только когда уведёшь мышь */
 @media (hover: hover) and (pointer: fine) {
 	.cell:hover {
@@ -220,20 +371,29 @@
 /* Тон выделения ложится поверх красного фона, а не заменяет его */
 .cell[data-range] {
 	background-image: linear-gradient(var(--range), var(--range));
-	border-radius: 0;
 }
 .cell[data-range='preview'] {
 	background-image: linear-gradient(var(--range-preview), var(--range-preview));
 }
 .cell[data-edge] {
 	box-shadow: inset 0 0 0 2px var(--accent);
-	border-radius: 5px;
 }
 .cell[data-pair] {
 	box-shadow: inset 0 0 0 2px var(--text-2);
 }
 .cell[aria-pressed='true'] {
 	box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+/* Номера недель в мини-месяце: узкая колонка мельче чисел */
+.miniGrid.withWeeks {
+	grid-template-columns: auto repeat(7, minmax(0, 1fr));
+}
+
+.miniGrid .weekNum {
+	min-width: 0;
+	padding-right: 4px;
+	font-size: 9px;
 }
 
 /* ---------- month ---------- */
@@ -283,6 +443,7 @@
 .weekNum {
 	align-self: center;
 	min-width: 1.6em;
+	padding-right: 6px;
 	font-size: 11px;
 	text-align: center;
 	color: var(--text-3);
@@ -304,14 +465,20 @@
 	border-color: var(--off-border);
 }
 
+/* В месячном виде у каждого числа одна и та же рамка 2em: кружок «сегодня» её заливает и цифра не сдвигается */
 .big .dayNum {
 	align-self: flex-start;
-	padding: 1px 5px;
+	display: grid;
+	place-items: center;
+	min-width: 2em;
+	height: 2em;
+	padding: 0 4px;
 }
 
 /* В большой ячейке внизу подпись праздника, поэтому точки — в правом верхнем углу, на уровне числа */
 .big .dots {
-	top: 10px;
+	/* Центр точек на уровне центра числа: отступ ячейки + половина рамки 2em − половина точки */
+	top: calc(1em + 0.5px);
 	right: 8px;
 	bottom: auto;
 	left: auto;
@@ -349,106 +516,78 @@
 		padding: 6px;
 		font-size: 15px;
 	}
-	.big .dayNum {
-		padding: 2px 6px;
+	.big .dots {
+		top: calc(1em + 2.5px);
 	}
 	.label {
 		display: block;
 	}
 }
 
-/* ---------- lanes ---------- */
-.lanesWrap {
-	border: 1px solid var(--border);
-	border-radius: var(--radius);
-	overflow: hidden;
-}
-
-.lanesScroll {
-	overflow-x: auto;
-	-webkit-overflow-scrolling: touch;
-	padding: 8px 8px 10px;
-}
-
-.lanes {
+/* Итоги под месяцем: месяц и его квартал рядом, на телефоне — друг под другом */
+.monthFoot {
 	display: grid;
-	grid-template-columns: 56px repeat(var(--days), minmax(26px, 1fr));
-	gap: 3px;
-	align-items: center;
-	min-width: max-content;
+	border-top: 1px solid var(--border);
 }
 
-.laneHead {
-	font-size: 11px;
-	line-height: 1.2;
-	text-align: center;
-	color: var(--text-3);
-	font-variant-numeric: tabular-nums;
+.footGroup {
+	display: grid;
+	gap: 6px;
+	padding: 10px 14px 12px;
 }
 
-.laneHead b {
-	display: block;
+.footGroup h4 {
 	font-size: 13px;
-	color: var(--text);
 	font-weight: 600;
+	color: var(--text-2);
+	text-transform: capitalize;
 }
 
-/* Сегодня в дорожках: число в акцентном кружке, как в остальных видах */
-.laneHeadToday b {
+.footQuarter {
+	border-top: 1px solid var(--border);
+	background: color-mix(in srgb, var(--season-bg) 45%, transparent);
+}
+
+.footTotals {
 	display: grid;
-	place-items: center;
-	width: 24px;
-	height: 24px;
-	margin: 0 auto;
-	border-radius: 50%;
-	background: var(--accent);
-	color: var(--on-accent);
+	grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+	gap: 8px;
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.15;
 }
 
-.laneHeadWeekend b {
+.footTotals div {
+	display: flex;
+	flex-direction: column-reverse;
+	gap: 2px;
+	min-width: 0;
+}
+
+.footTotals dd {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 650;
+	color: var(--text);
+}
+
+.footTotals dt {
+	font-size: 11px;
+	color: var(--text-3);
+}
+
+.footTotals [data-k='off'] dd {
 	color: var(--off-text);
 }
 
-.laneLabel {
-	position: sticky;
-	left: 0;
-	z-index: 1;
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	padding-right: 4px;
-	background: var(--bg);
-	font-size: 13px;
-	font-weight: 600;
-}
-
-.lane {
-	height: 30px;
-	padding: 0;
-	border: 0;
-	border-radius: 5px;
-	background: var(--seg-empty);
-}
-
-/* Дорожки: праздник или перенос — цвет страны, обычный выходной — его светлый тон */
-.lane[data-k='weekend'] {
-	background: var(--c-soft);
-}
-.lane[data-k='holiday'],
-.lane[data-k='transfer'] {
-	background: var(--c);
-}
-.lane[data-range] {
-	outline: 2px solid var(--accent);
-	outline-offset: -2px;
-}
-.lane[data-range='preview'] {
-	outline-color: var(--range);
-}
-.lane[aria-pressed='true'],
-.lane[data-pair] {
-	outline: 2px solid var(--text);
-	outline-offset: 1px;
+@media (min-width: 640px) {
+	.monthFoot {
+		grid-template-columns: 1fr 1fr;
+	}
+	.footQuarter {
+		border-top: 0;
+		border-left: 1px solid var(--border);
+	}
 }
 
 /* ---------- transfer arrows ---------- */
@@ -493,14 +632,6 @@
 	background: var(--off-bg);
 }
 
-.swatchHoliday {
-	background: var(--c);
-}
-
-.swatchWeekend {
-	background: var(--c-soft);
-}
-
 .legendDots {
 	display: inline-flex;
 	gap: 2px;
@@ -516,9 +647,20 @@
 	.yearGrid {
 		gap: 8px;
 	}
+	.quarterHead {
+		margin-bottom: 4px;
+	}
+	.quarterMonths {
+		gap: 8px;
+	}
+	.quarter {
+		break-inside: avoid;
+	}
+	.monthTotals {
+		padding: 2px;
+	}
 	.monthCard,
 	.monthView,
-	.lanesWrap,
 	.legend {
 		break-inside: avoid;
 	}
@@ -533,28 +675,15 @@
 	.cell.today[data-off] .dayNum {
 		color: var(--off-text);
 	}
+	.cell.today .dayNum::before,
+	.cell.today .dayNum::after {
+		content: none;
+	}
 	.big {
 		aspect-ratio: auto;
 		min-height: 64px;
 	}
 	.label {
 		display: block;
-	}
-	.lanesScroll {
-		overflow: visible;
-	}
-	.lanes {
-		grid-template-columns: 40px repeat(var(--days), minmax(0, 1fr));
-		gap: 2px;
-		min-width: 0;
-	}
-	.lane {
-		height: 20px;
-	}
-	.laneHead {
-		font-size: 8px;
-	}
-	.laneHead b {
-		font-size: 10px;
 	}
 }

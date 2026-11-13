@@ -40,7 +40,6 @@
 		"unit": "calendar",
 		"pay": {
 			"days": "charged",
-			"divisor": 29.3,
 			"source": "https://legalacts.ru/kodeks/TK-RF/chast-iii/razdel-vi/glava-21/statja-139/"
 		},
 		"minDays": 28,

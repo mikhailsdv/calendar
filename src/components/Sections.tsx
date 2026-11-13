@@ -43,34 +43,29 @@ export const CompareSection = () => {
 
 	return (
 		<section class={s.section} aria-labelledby="compare-title">
-			<h2 id="compare-title">{fmt(t.compare.title, {year})}</h2>
+			<h2 id="compare-title">
+				{fmt(stats.length > 1 ? t.compare.title : t.compare.totals, {year})}
+			</h2>
 			<div class="table-wrap">
 				<table class="table">
 					<thead>
 						<tr>
 							<th scope="col">{t.compare.metric}</th>
-							{stats.map(({country}) => (
+							{stats.map(({country, data}) => (
 								<th key={country.id} scope="col">
 									<CountryHead country={country} as="span" />
+									{/* Год ещё не утверждён: помечаем прогноз прямо у страны, без отдельной строки */}
+									{data?.status === 'forecast' ? (
+										<>
+											{' '}
+											<span class="badge">{t.compare.forecast}</span>
+										</>
+									) : null}
 								</th>
 							))}
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<th scope="row">{t.compare.status}</th>
-							{stats.map(({country, data}) => (
-								<td key={country.id}>
-									{!data ? (
-										t.compare.noData
-									) : data.status === 'official' ? (
-										t.compare.official
-									) : (
-										<span class="badge">{t.compare.forecast}</span>
-									)}
-								</td>
-							))}
-						</tr>
 						<tr>
 							<th scope="row">{t.compare.workdays}</th>
 							{stats.map(({country, data, total}) => (
@@ -92,11 +87,6 @@ export const CompareSection = () => {
 							{stats.map(({country, data, total}) => (
 								<td key={country.id} class="num">
 									{cell(total.holidays, Boolean(data))}
-									{data && total.holidaysOnWeekend ? (
-										<div class={s.muted}>
-											{t.compare.holidaysOnWeekend}: {total.holidaysOnWeekend}
-										</div>
-									) : null}
 								</td>
 							))}
 						</tr>
@@ -155,7 +145,13 @@ export const CompareSection = () => {
 									</th>
 									{stats.map(({country, data, months}) => (
 										<td key={country.id} class="num">
-											{data ? `${months[i]!.workdays} / ${months[i]!.hours[norm] ?? '—'}` : '—'}
+											{data
+												? `${months[i]!.workdays} ${t.quarter.work} / ${
+														months[i]!.hours[norm] != null
+															? `${months[i]!.hours[norm]} ${t.quarter.hours}`
+															: '—'
+													}`
+												: '—'}
 										</td>
 									))}
 								</tr>
@@ -176,8 +172,7 @@ const CountryHolidays = ({country}: {country: Country}) => {
 	const i18n = useI18n()
 	const {t, lang} = i18n
 	const data = store.lookup.value(country.id, store.year.value)
-	const showObservances = store.settings.value.showObservances
-	const events = yearEvents(data).filter(e => showObservances || e.entry.type !== 'observance')
+	const events = yearEvents(data)
 
 	return (
 		<>
@@ -196,7 +191,6 @@ const CountryHolidays = ({country}: {country: Country}) => {
 							{events.map(({date, entry}) => {
 								const holiday = entry.holiday ? country.holidays[entry.holiday] : undefined
 								const notes: string[] = []
-								if (entry.type === 'holiday') notes.push(t.holidays.dayOff)
 								if (entry.type === 'observance') notes.push(t.holidays.noDayOff)
 								if (entry.transfer?.from)
 									notes.push(
@@ -303,22 +297,14 @@ export const HolidaysSection = () => {
 
 export const RulesSection = () => {
 	const store = useStore()
-	const {t, lang} = useI18n()
+	const {t} = useI18n()
 	return (
 		<section class={s.section} aria-labelledby="rules-title">
 			<h2 id="rules-title">{t.rules.title}</h2>
-			<p class={s.moneyTip}>{t.rules.moneyTip}</p>
 			<div class={s.rules}>
 				{store.countries.value.map(country => {
 					const r = country.rules
 					const leave = country.leave
-					const {divisor} = leave.pay
-					const divisorText =
-						typeof divisor === 'number'
-							? new Intl.NumberFormat(lang).format(divisor)
-							: divisor === 'year-workdays'
-								? t.rules.divisorWorkdays
-								: t.rules.divisorCalendar
 					const items = [
 						t.rules.weekendHoliday[r.weekendHoliday],
 						r.decreeTransfers ? t.rules.decree : null,
@@ -330,9 +316,6 @@ export const RulesSection = () => {
 									n: leave.minDays,
 								})
 							: null,
-						fmt(leave.pay.days === 'charged' ? t.rules.payCharged : t.rules.payWorkdays, {
-							divisor: divisorText,
-						}),
 						t.rules.notes[country.id] ?? null,
 					].filter(Boolean)
 					return (

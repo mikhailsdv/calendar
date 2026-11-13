@@ -6,13 +6,12 @@ const en: Dict = {
 		title: 'Working calendar {year}: Russia, Kazakhstan, Belarus, Armenia, Ukraine',
 		titleCurrent: 'Working calendar of Russia, Kazakhstan, Belarus, Armenia and Ukraine',
 		description:
-			'Public holidays, transferred days off and weekends of {year} in five countries on one calendar. Vacation days counted by each country’s rules, plus the best dates to take time off.',
+			'Public holidays, transferred days off and weekends of {year} in five countries on one calendar. Working days and hours by month and quarter, vacation days counted by each country’s rules.',
 		rootDescription:
 			'Working calendar of Russia, Kazakhstan, Belarus, Armenia and Ukraine: holidays, transfers, vacations.',
-		notFound: 'Page not found',
 		countryTitle: '{country} working calendar {year}: public holidays and transfers',
 		countryDescription:
-			'Public holidays, transferred days off, weekends and working hours of {country} in {year}. Vacation days counted by local rules, plus the best dates to take time off.',
+			'Public holidays, transferred days off, weekends and working hours of {country} in {year} by month and quarter. Vacation days counted by local rules.',
 	},
 	header: {
 		h1: 'Working calendar {year}',
@@ -25,13 +24,14 @@ const en: Dict = {
 		print: 'Print',
 	},
 	toolbar: {
+		compare: 'Compare',
 		prevYear: 'Previous year',
 		nextYear: 'Next year',
 		prevMonth: 'Previous month',
 		nextMonth: 'Next month',
 		today: 'Today',
 		view: 'View',
-		views: {year: 'Year', month: 'Month', lanes: 'Lanes'},
+		views: {year: 'Year', month: 'Month'},
 		mode: 'Mode',
 		modes: {view: 'Browse', vacation: 'Vacation'},
 		countries: 'Countries',
@@ -89,10 +89,16 @@ const en: Dict = {
 		title: 'Legend',
 		off: 'Day off or holiday: {country}',
 		other: 'Weekday off in another country',
-		holiday: 'Holiday or moved day off',
-		weekend: 'Weekend',
 	},
 	seasons: {winter: 'Winter', spring: 'Spring', summer: 'Summer', autumn: 'Autumn'},
+	quarter: {
+		names: ['Q1', 'Q2', 'Q3', 'Q4'],
+		calendar: 'days',
+		work: 'work',
+		off: 'off',
+		hours: 'h',
+		calendarFull: 'Calendar days',
+	},
 	details: {
 		week: 'week {n}',
 		today: 'today',
@@ -101,8 +107,8 @@ const en: Dict = {
 		afterTomorrow: 'the day after tomorrow',
 		beforeYesterday: 'the day before yesterday',
 		workdaysUntil: 'until this date',
-		transferFrom: 'Day off moved from {date}',
-		transferTo: 'Working day instead of {date}',
+		transferFrom: 'Day off moved from {date}.',
+		transferTo: 'Working day instead of {date}.',
 		show: 'Show',
 		shortBy: '{n} h shorter',
 		tentative: 'the date may shift',
@@ -127,39 +133,16 @@ const en: Dict = {
 		rest: 'Time off',
 		holidaysInside: 'holidays inside: {n}',
 		workdays: 'Working days: {n}',
-		money: '{value}% of salary',
-		moneyHint:
-			'Vacation pay minus the salary you would earn working these days, as a share of your monthly salary',
-		moneyNote:
-			'% of salary shows how much more or less vacation pay brings than working the same days. An estimate for a fixed salary without bonuses',
 		clear: 'Clear',
-		share: 'Share link',
-		copied: 'Copied',
-		hintTitle: 'More time off for the same days',
-		hintText: '{range}: {rest} off, {charged} charged',
-		apply: 'Pick',
-	},
-	navigator: {
-		title: 'Find the best dates',
-		goal: 'Optimize for',
-		goals: {rest: 'More time off', money: 'More money'},
-		budget: 'Vacation days',
-		country: 'Country',
-		empty: 'No suitable windows found',
-		horizon: 'Next 12 months',
-		horizonYear: 'Year {year}',
-		item: '{rest} off for {charged}',
 	},
 	compare: {
 		title: 'Countries compared in {year}',
+		totals: 'Totals for {year}',
 		metric: 'Metric',
-		status: 'Status',
-		official: 'official',
 		forecast: 'forecast',
 		workdays: 'Working days',
 		offdays: 'Weekends and holidays',
 		holidays: 'Public holidays',
-		holidaysOnWeekend: 'of them on weekends',
 		hours: 'Working hours, {n}-hour week',
 		minLeave: 'Minimum annual leave',
 		leaveCalendar: 'calendar days: {n}',
@@ -173,7 +156,6 @@ const en: Dict = {
 		date: 'Date',
 		name: 'Event',
 		note: 'Note',
-		dayOff: 'day off',
 		noDayOff: 'no day off',
 		transferFrom: 'moved from {date}',
 		workdayFor: 'working day instead of {date}',
@@ -194,14 +176,6 @@ const en: Dict = {
 		leaveCalendar:
 			'Annual leave is at least {n} calendar days. Holidays are not counted and extend it; transferred days off are charged.',
 		leaveWorking: 'Annual leave is at least {n} working days.',
-		payCharged:
-			'Vacation pay: average earnings for 12 months ÷ 12 ÷ {divisor} × paid vacation days.',
-		payWorkdays:
-			'Vacation pay: average daily earnings (monthly ÷ {divisor}) × working days inside the vacation.',
-		divisorWorkdays: 'the average number of working days in a month',
-		divisorCalendar: 'the average number of calendar days in a month without holidays',
-		moneyTip:
-			'Money-wise, a vacation pays off in months with more working days: a day of salary is cheaper there, while vacation pay does not depend on the month. Vacations next to holidays or before an annual bonus is counted usually pay less.',
 		notes: {
 			ru: 'Days off from New Year holidays that fall on a weekend are moved by decree to any date, even to the end of the year.',
 			kz: 'Religious holidays (Kurban Ait, Christmas) are not moved from weekends. The date of Kurban Ait follows the lunar calendar.',
@@ -218,8 +192,10 @@ const en: Dict = {
 		weekAuto: 'as in the main country',
 		monday: 'Monday',
 		sunday: 'Sunday',
+		workWeek: 'Working week',
+		fiveDay: 'five-day',
+		sixDay: 'six-day',
 		hoursNorm: 'Working hours per week',
-		showObservances: 'Show holidays without a day off',
 		weekNumbers: 'Show week numbers',
 		close: 'Done',
 	},
@@ -234,10 +210,6 @@ const en: Dict = {
 	},
 	root: {
 		choose: 'Choose your language',
-	},
-	notFound: {
-		title: 'There is no such page',
-		back: 'Open the calendar',
 	},
 }
 

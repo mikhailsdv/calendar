@@ -3,7 +3,6 @@ import {describe, expect, it} from 'vitest'
 import {
 	addDays,
 	diffDays,
-	eachDay,
 	isoWeekday,
 	isoWeekNumber,
 	monthGrid,
@@ -20,7 +19,6 @@ describe('dates', () => {
 
 	it('counts differences', () => {
 		expect(diffDays('2026-11-12', '2027-05-10')).toBe(179)
-		expect(eachDay('2027-05-01', '2027-05-03')).toEqual(['2027-05-01', '2027-05-02', '2027-05-03'])
 	})
 
 	it('returns ISO weekdays', () => {

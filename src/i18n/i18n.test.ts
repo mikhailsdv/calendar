@@ -1,16 +1,7 @@
 import {describe, expect, it} from 'vitest'
 
 import {LANGS} from '../config'
-import {
-	detectLang,
-	fmt,
-	formatDate,
-	formatRange,
-	type I18n,
-	loadDict,
-	plural,
-	weekdayName,
-} from './index'
+import {fmt, formatDate, formatRange, type I18n, loadDict, plural, weekdayName} from './index'
 import ru from './locales/ru'
 
 type Shape = string | number | Shape[] | {[key: string]: Shape}
@@ -103,14 +94,5 @@ describe('helpers', () => {
 		)
 		expect(formatRange(await i18nOf('en'), '2027-05-04', '2027-05-07')).toBe('May 4–7, 2027')
 		expect(weekdayName(await i18nOf('be'), '2027-05-10')).toBe('панядзелак')
-	})
-
-	it('detects the language with a fallback to Russian', () => {
-		expect(detectLang(['kk-KZ', 'ru'])).toBe('kk')
-		expect(detectLang(['de-DE', 'hy'])).toBe('hy')
-		expect(detectLang(['ua'])).toBe('uk')
-		expect(detectLang(['en-GB'])).toBe('en')
-		expect(detectLang(['de', 'fr'])).toBe('ru')
-		expect(detectLang([])).toBe('ru')
 	})
 })

@@ -1,7 +1,7 @@
 import {createContext} from 'preact'
 import {useContext} from 'preact/hooks'
 
-import {DEFAULT_LANG, isLang, type Lang} from '../config'
+import type {Lang} from '../config'
 import type {LocalizedText} from '../data/types'
 import {type ISODate, isoWeekday, parseISO} from '../domain/dates'
 import type {Dict} from './locales/ru'
@@ -85,15 +85,3 @@ export const weekdayName = ({t}: I18n, date: ISODate) => t.weekdays[isoWeekday(d
 export const weekdayShort = ({t}: I18n, isoDay: number) => t.weekdaysShort[isoDay - 1]!
 
 export const localized = (text: LocalizedText, lang: Lang) => text[lang] ?? text.ru
-
-const ALIASES: Record<string, Lang> = {kz: 'kk', am: 'hy', by: 'be', ua: 'uk'}
-
-/** Первый поддерживаемый язык из списка браузера, иначе русский */
-export const detectLang = (languages: readonly string[]): Lang => {
-	for (const tag of languages) {
-		const base = tag.toLowerCase().split(/[-_]/)[0] ?? ''
-		const lang = ALIASES[base] ?? base
-		if (isLang(lang)) return lang
-	}
-	return DEFAULT_LANG
-}

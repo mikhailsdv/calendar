@@ -1,6 +1,6 @@
 import {isLang, type Lang, MAX_COUNTRIES, STORAGE_KEY} from '../config'
 
-export type View = 'year' | 'month' | 'lanes'
+export type View = 'year' | 'month'
 export type Theme = 'light' | 'dark'
 
 /** Настройки, которые переживают перезагрузку страницы */
@@ -8,20 +8,20 @@ export interface Settings {
 	theme: Theme
 	/** Только явно выбранный язык; автоопределение сюда не пишет */
 	lang: Lang | null
-	/** Активные страны по порядку, первая — основная */
+	/** Выбранные для сравнения страны по порядку, первая — основная. Помнятся и при выключенном сравнении */
 	countries: string[]
+	/** Сравнение включено: на календаре все выбранные страны, иначе только основная */
+	compare: boolean
 	view: View
 	weekStart: 'auto' | 1 | 7
 	hoursNorm: 40 | 36 | 24
-	showObservances: boolean
+	/** Пятидневная или шестидневная рабочая неделя */
+	workWeek: 5 | 6
 	/** Колонка с номерами ISO-недель в месячном виде */
 	showWeekNumbers: boolean
-	budget: number
-	/** Что ищет навигатор: больше отдыха или больше денег */
-	navigatorGoal: 'rest' | 'money'
 }
 
-const VIEWS: View[] = ['year', 'month', 'lanes']
+const VIEWS: View[] = ['year', 'month']
 
 const pick = <T>(value: unknown, allowed: readonly T[], fallback: T): T =>
 	allowed.includes(value as T) ? (value as T) : fallback
@@ -36,22 +36,20 @@ export const sanitizeSettings = (
 	const countries = Array.isArray(value.countries)
 		? [...new Set(value.countries.filter(id => knownCountries.includes(id as string)))]
 		: []
-	const budget = Number(value.budget)
 	return {
 		theme: pick(value.theme, ['light', 'dark'] as const, defaults.theme),
 		lang: isLang(value.lang) ? value.lang : defaults.lang,
 		countries: countries.length
 			? (countries as string[]).slice(0, MAX_COUNTRIES)
 			: defaults.countries,
+		// Старые настройки без флага: несколько стран значит, что человек уже сравнивал
+		compare: typeof value.compare === 'boolean' ? value.compare : countries.length > 1,
 		view: pick(value.view, VIEWS, defaults.view),
 		weekStart: pick(value.weekStart, ['auto', 1, 7] as const, defaults.weekStart),
 		hoursNorm: pick(value.hoursNorm, [40, 36, 24] as const, defaults.hoursNorm),
-		showObservances:
-			typeof value.showObservances === 'boolean' ? value.showObservances : defaults.showObservances,
+		workWeek: pick(value.workWeek, [5, 6] as const, defaults.workWeek),
 		showWeekNumbers:
 			typeof value.showWeekNumbers === 'boolean' ? value.showWeekNumbers : defaults.showWeekNumbers,
-		budget: Number.isInteger(budget) && budget >= 1 && budget <= 60 ? budget : defaults.budget,
-		navigatorGoal: pick(value.navigatorGoal, ['rest', 'money'] as const, defaults.navigatorGoal),
 	}
 }
 

@@ -41,7 +41,6 @@
 		"unit": "calendar",
 		"pay": {
 			"days": "charged",
-			"divisor": "year-calendar",
 			"source": "https://buhplatforma.com.ua/article/7067-vidpuskni-2025-pryklady-formuly-tablytsia-dlia-bukhgaltera"
 		},
 		"minDays": 24,

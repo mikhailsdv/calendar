@@ -2,13 +2,10 @@ import type {ComponentChildren} from 'preact'
 import {useEffect, useMemo, useRef, useState} from 'preact/hooks'
 
 import {track} from '../analytics/metrika'
-import {shareUrl} from '../app/share'
-import {YEARS} from '../data/loader'
 import type {Country} from '../data/types'
 import {activeRegime, dayOf, workdaysBetween} from '../domain/calendar'
 import {diffDays, type ISODate, isoWeekday, isoWeekNumber, yearOf} from '../domain/dates'
 import {computeLeave} from '../domain/leave'
-import {bestWindows, improveSelection, searchRange} from '../domain/navigator'
 import {upcomingHolidays} from '../domain/upcoming'
 import {
 	fmt,
@@ -22,16 +19,9 @@ import {
 } from '../i18n'
 import {useStore} from '../state/store'
 import {Flag} from './Flag'
-import {
-	CheckIcon,
-	CloseIcon,
-	LinkIcon,
-	MinusIcon,
-	PlusIcon,
-	PointerIcon,
-	SparklesIcon,
-} from './icons'
+import {CloseIcon, PointerIcon} from './icons'
 import s from './Panel.module.css'
+import {revealDate} from './reveal'
 import {SHEET_MEDIA, useSheet} from './useSheet'
 
 const CountryName = ({country}: {country: Country}) => {
@@ -40,27 +30,6 @@ const CountryName = ({country}: {country: Country}) => {
 		<span class={s.country}>
 			<Flag code={country.id} />
 			{localized(country.name, lang)}
-		</span>
-	)
-}
-
-/**
- * Деньги за отпуск относительно работы в те же дни, в процентах месячного оклада:
- * зелёный — отпускные больше зарплаты за эти дни, красный — меньше
- */
-const MoneyBadge = ({value}: {value: number}) => {
-	const {t, lang} = useI18n()
-	const percent = Math.round(value * 100)
-	// Типографский минус вместо дефиса: «−7 %» читается как число, а не как тире
-	const text = new Intl.NumberFormat(lang, {signDisplay: 'exceptZero'})
-		.format(percent)
-		.replace('-', '−')
-	return (
-		<span
-			class={`${s.money} ${percent > 0 ? s.moneyUp : percent < 0 ? s.moneyDown : ''}`}
-			title={t.vacation.moneyHint}
-		>
-			{fmt(t.vacation.money, {value: text})}
 		</span>
 	)
 }
@@ -114,6 +83,7 @@ const Upcoming = () => {
 							onClick={() => {
 								store.goTo(item.date)
 								store.selected.value = item.date
+								revealDate(item.date)
 								track('upcoming_open', {
 									country: item.countries[0]!.id,
 									days_until: item.daysUntil,
@@ -166,12 +136,12 @@ const DayRows = ({date}: {date: ISODate}) => {
 	const {t, lang} = i18n
 	const today = store.today.value
 	const lookup = store.lookup.value
-	const showObservances = store.settings.value.showObservances
 	const ahead = today != null && diffDays(today, date) > 0
 
 	const show = (country: Country, target: ISODate) => {
 		store.goTo(target)
 		store.selected.value = target
+		revealDate(target)
 		track('transfer_open', {country: country.id})
 	}
 
@@ -185,7 +155,7 @@ const DayRows = ({date}: {date: ISODate}) => {
 				const regime = info.observance ? activeRegime(country, yearData, date) : undefined
 				const status = info.noData
 					? t.kinds.noData
-					: holiday && (info.kind === 'holiday' || showObservances)
+					: holiday
 						? localized(holiday.name, lang)
 						: t.kinds[info.kind]
 				const kindLabel =
@@ -264,251 +234,42 @@ const VacationResult = ({from, to}: {from: ISODate; to: ISODate}) => {
 	const i18n = useI18n()
 	const {t, lang} = i18n
 	const lookup = store.lookup.value
-	const home = store.home.value
-	const hint = useMemo(() => improveSelection(home, lookup, from, to), [home, lookup, from, to])
 
 	return (
-		<>
-			<ul class={s.rows}>
-				{store.countries.value.map(country => {
-					const r = computeLeave(country, lookup, from, to)
-					const unit =
-						country.leave.unit === 'working' ? t.vacation.chargedWorking : t.vacation.charged
-					return (
-						<li key={country.id} class={s.row} data-c={country.id}>
-							<span class={s.stripe} />
-							<div class={s.hintRow}>
-								<CountryName country={country} />
-								<MoneyBadge value={r.money} />
-							</div>
-							<div>
-								<p class={s.status}>
-									{t.vacation.rest}: {plural(lang, t.plural.days, r.rest.days)}
-									<span class={s.meta}>
-										{' '}
-										· {formatRange(i18n, r.rest.from, r.rest.to, thisYear)}
-									</span>
-								</p>
+		<ul class={s.rows}>
+			{store.countries.value.map(country => {
+				const r = computeLeave(country, lookup, from, to)
+				const working = country.leave.unit === 'working'
+				// Рабочие дни нужны, только если отпускные платят за них, а отпуск считается в календарных
+				const showWorkdays = country.leave.pay.days === 'workdays' && !working
+				return (
+					<li key={country.id} class={s.row} data-c={country.id}>
+						<span class={s.stripe} />
+						<CountryName country={country} />
+						{/* Даты и длина отпуска уже в шапке: здесь только то, что отличается по странам */}
+						<div>
+							<p class={s.status}>
+								{working ? t.vacation.chargedWorking : t.vacation.charged}: {r.charged}
+							</p>
+							{showWorkdays || r.holidaysInside ? (
 								<p class={s.stats}>
-									<span>
-										{unit}: {r.charged}
-									</span>
-									<span>{fmt(t.vacation.workdays, {n: r.workdays})}</span>
 									{r.holidaysInside ? (
 										<span>{fmt(t.vacation.holidaysInside, {n: r.holidaysInside})}</span>
 									) : null}
+									{showWorkdays ? <span>{fmt(t.vacation.workdays, {n: r.workdays})}</span> : null}
 								</p>
-							</div>
-						</li>
-					)
-				})}
-			</ul>
-			<p class={s.note}>{t.vacation.moneyNote}</p>
-			{hint ? (
-				<div class={s.hint}>
-					<b>
-						{t.vacation.hintTitle} · {localized(home.name, lang)}
-					</b>
-					<div class={s.hintRow}>
-						<span>
-							{fmt(t.vacation.hintText, {
-								range: formatRange(i18n, hint.from, hint.to, thisYear),
-								rest: plural(lang, t.plural.days, hint.result.rest.days),
-								charged: plural(lang, t.plural.days, hint.result.charged),
-							})}
-						</span>
-						<button
-							type="button"
-							class="btn"
-							onClick={() => {
-								store.setRange(hint.from, hint.to)
-								track('magnet_hint_apply', {
-									country: home.id,
-									rest_gain: hint.restGain,
-									charged_saved: hint.chargedSaved,
-								})
-							}}
-						>
-							{t.vacation.apply}
-						</button>
-					</div>
-				</div>
-			) : null}
-		</>
-	)
-}
-
-const Navigator = () => {
-	const store = useStore()
-	const thisYear = store.today.value ? Number(store.today.value.slice(0, 4)) : null
-	const i18n = useI18n()
-	const {t, lang} = i18n
-	const countries = store.countries.value
-	const selectedId = store.navigatorCountry.value
-	const country = countries.find(c => c.id === selectedId) ?? store.home.value
-	const budget = store.settings.value.budget
-	const year = store.year.value
-	const lookup = store.lookup.value
-	const today = store.today.value
-	const goal = store.settings.value.navigatorGoal
-
-	const range = useMemo(() => searchRange(year, today, YEARS[YEARS.length - 1]!), [year, today])
-	const windows = useMemo(
-		() => bestWindows(country, lookup, {from: range.from, to: range.to, budget, goal}),
-		[country, lookup, range, budget, goal]
-	)
-
-	const setBudget = (value: number) => {
-		const next = Math.min(28, Math.max(1, value))
-		store.updateSettings({budget: next})
-		track('navigator_budget_change', {budget: next})
-	}
-
-	return (
-		<section class={s.navigator} aria-labelledby="navigator-title">
-			<div>
-				<h3 id="navigator-title" class={s.navTitle}>
-					<SparklesIcon />
-					{t.navigator.title}
-				</h3>
-				<p class={s.horizon}>
-					{range.ahead ? t.navigator.horizon : fmt(t.navigator.horizonYear, {year})}
-				</p>
-			</div>
-			<div class={`segmented ${s.goal}`} role="group" aria-label={t.navigator.goal}>
-				{(['rest', 'money'] as const).map(g => (
-					<button
-						key={g}
-						type="button"
-						aria-pressed={goal === g}
-						onClick={() => {
-							store.updateSettings({navigatorGoal: g})
-							track('navigator_goal_change', {goal: g})
-						}}
-					>
-						{t.navigator.goals[g]}
-					</button>
-				))}
-			</div>
-			<div class={s.controls}>
-				<span>{t.navigator.budget}</span>
-				<span class={s.stepper}>
-					<button
-						type="button"
-						class="btn btn-ghost btn-sm btn-icon"
-						aria-label="−"
-						disabled={budget <= 1}
-						onClick={() => setBudget(budget - 1)}
-					>
-						<MinusIcon />
-					</button>
-					<output aria-live="polite">{budget}</output>
-					<button
-						type="button"
-						class="btn btn-ghost btn-sm btn-icon"
-						aria-label="+"
-						disabled={budget >= 28}
-						onClick={() => setBudget(budget + 1)}
-					>
-						<PlusIcon />
-					</button>
-				</span>
-				{countries.length > 1 ? (
-					<select
-						aria-label={t.navigator.country}
-						value={country.id}
-						onChange={e => (store.navigatorCountry.value = (e.target as HTMLSelectElement).value)}
-					>
-						{countries.map(c => (
-							<option key={c.id} value={c.id}>
-								{localized(c.name, lang)}
-							</option>
-						))}
-					</select>
-				) : null}
-			</div>
-			{windows.length ? (
-				<ul class={s.windows}>
-					{windows.map(w => (
-						<li key={w.from}>
-							<button
-								type="button"
-								class={s.window}
-								onClick={() => {
-									store.setRange(w.from, w.to)
-									track('navigator_apply', {
-										country: country.id,
-										rest: w.rest.days,
-										charged: w.charged,
-									})
-								}}
-							>
-								<div>
-									{formatRange(i18n, w.from, w.to, thisYear)}
-									<span>
-										{fmt(t.navigator.item, {
-											rest: plural(lang, t.plural.days, w.rest.days),
-											charged: plural(lang, t.plural.days, w.charged),
-										})}{' '}
-										· {formatRange(i18n, w.rest.from, w.rest.to, thisYear)}
-									</span>
-								</div>
-								<MoneyBadge value={w.money} />
-							</button>
-						</li>
-					))}
-				</ul>
-			) : (
-				<p class={s.empty}>{t.navigator.empty}</p>
-			)}
-		</section>
-	)
-}
-
-/**
- * Ссылка на выбранный отпуск. На телефоне — системное меню «Поделиться»,
- * на компьютере ссылка копируется, а кнопка ненадолго показывает «Скопировано».
- */
-const ShareButton = ({from, to}: {from: ISODate; to: ISODate}) => {
-	const store = useStore()
-	const {t, lang} = useI18n()
-	const [copied, setCopied] = useState(false)
-
-	useEffect(() => {
-		if (!copied) return
-		const timer = setTimeout(() => setCopied(false), 2000)
-		return () => clearTimeout(timer)
-	}, [copied])
-
-	const share = () => {
-		const countries = store.settings.value.countries
-		const url = shareUrl(location.origin, lang, {countries, from, to})
-		const params = {days: diffDays(from, to) + 1, countries: countries.length}
-		if (typeof navigator.share === 'function' && matchMedia('(pointer: coarse)').matches) {
-			track('share_click', {method: 'native', ...params})
-			navigator.share({url, title: document.title}).catch(() => {})
-			return
-		}
-		track('share_click', {method: 'clipboard', ...params})
-		navigator.clipboard?.writeText(url).then(
-			() => setCopied(true),
-			() => {}
-		)
-	}
-
-	return (
-		<button
-			type="button"
-			class={`btn btn-ghost btn-sm btn-icon ${copied ? s.copied : ''}`}
-			aria-label={copied ? t.vacation.copied : t.vacation.share}
-			title={copied ? t.vacation.copied : t.vacation.share}
-			onClick={share}
-		>
-			{copied ? <CheckIcon /> : <LinkIcon />}
-			<span class="sr-only" aria-live="polite">
-				{copied ? t.vacation.copied : ''}
-			</span>
-		</button>
+							) : null}
+							{r.rest.days > r.calendarDays ? (
+								<p class={s.stats}>
+									{t.vacation.rest}: {plural(lang, t.plural.days, r.rest.days)} ·{' '}
+									{formatRange(i18n, r.rest.from, r.rest.to, thisYear)}
+								</p>
+							) : null}
+						</div>
+					</li>
+				)
+			})}
+		</ul>
 	)
 }
 
@@ -581,7 +342,6 @@ export const Panel = () => {
 					<p class={s.title}>{t.vacation.title}</p>
 				)}
 				<span class={s.headActions}>
-					{range?.end ? <ShareButton from={range.start} to={range.end} /> : null}
 					{range ? (
 						<button
 							type="button"
@@ -591,15 +351,6 @@ export const Panel = () => {
 							onClick={close}
 						>
 							<CloseIcon />
-						</button>
-					) : collapsed ? (
-						<button
-							type="button"
-							class={`btn btn-ghost btn-sm ${s.navBtn}`}
-							onClick={() => changeSheet(false, 'tap')}
-						>
-							<SparklesIcon />
-							<span>{t.navigator.title}</span>
 						</button>
 					) : null}
 				</span>
@@ -648,10 +399,9 @@ export const Panel = () => {
 			) : null}
 			<div class={s.body}>
 				{mode === 'vacation' ? (
-					<>
-						{range?.end ? <VacationResult from={range.start} to={range.end} /> : null}
-						<Navigator />
-					</>
+					range?.end ? (
+						<VacationResult from={range.start} to={range.end} />
+					) : null
 				) : selected ? (
 					<DayRows date={selected} />
 				) : (

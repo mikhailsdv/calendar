@@ -39,7 +39,6 @@
 		"unit": "working",
 		"pay": {
 			"days": "workdays",
-			"divisor": 21,
 			"source": "https://armenian-lawyer.com/business-immigration/armenian-annual-leave-calculation-guide/"
 		},
 		"minDays": 20,

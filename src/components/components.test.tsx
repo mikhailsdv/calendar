@@ -56,7 +56,7 @@ describe('calendar', () => {
 		const active = chips
 			.getAllByRole('button')
 			.filter(b => b.getAttribute('aria-pressed') === 'true')
-		expect(active.map(b => b.textContent)).toEqual(['Россия· основная'])
+		expect(active.map(b => b.textContent)).toEqual(['Россия'])
 		expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
 	})
 
@@ -68,7 +68,7 @@ describe('calendar', () => {
 			.getAllByRole('button')
 			.filter(b => b.getAttribute('aria-pressed') === 'true')
 		// Чипы идут в обычном порядке стран, основной стала страна из адреса
-		expect(active.map(b => b.dataset.c)).toEqual(['ru', 'kz', 'by'])
+		expect(active.map(b => b.dataset.c).filter(Boolean)).toEqual(['ru', 'kz', 'by'])
 		expect(chips.getByRole('button', {name: /Казахстан/}).textContent).toContain('основная')
 		expect(container.querySelector('h1')?.textContent).toBe(
 			'Производственный календарь Казахстана на 2027 год'
@@ -139,6 +139,29 @@ describe('calendar', () => {
 		expect([...cell(container, '2027-05-10').querySelectorAll('i')].map(i => i.dataset.c)).toEqual([
 			'kz',
 		])
+	})
+
+	it('compares countries only after «Сравнить» and remembers the choice', async () => {
+		const {container, getByRole} = await renderApp()
+		const chips = within(getByRole('group', {name: 'Страны'}))
+		// Без сравнения чип меняет основную страну, а не добавляет вторую
+		fireEvent.click(chips.getByRole('button', {name: /Казахстан/}))
+		expect(cell(container, '2027-01-05').querySelectorAll('i')).toHaveLength(0)
+		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries[0]).toBe('kz')
+		// Прежняя основная страна осталась в списке и появляется при сравнении
+		fireEvent.click(chips.getByRole('button', {name: 'Сравнить'}))
+		// 5 января 2027 в России новогодние каникулы, а в Казахстане рабочий день: точка России
+		expect([...cell(container, '2027-01-05').querySelectorAll('i')].map(i => i.dataset.c)).toEqual([
+			'ru',
+		])
+		fireEvent.click(chips.getByRole('button', {name: /Беларусь/}))
+		const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)!)
+		expect(saved.compare).toBe(true)
+		expect(saved.countries).toEqual(['kz', 'ru', 'by'])
+		// Выключили сравнение: на календаре снова одна страна, но выбор сохранён
+		fireEvent.click(chips.getByRole('button', {name: 'Сравнить'}))
+		expect(cell(container, '2027-01-05').querySelectorAll('i')).toHaveLength(0)
+		expect(JSON.parse(localStorage.getItem(STORAGE_KEY)!).countries).toEqual(['kz', 'ru', 'by'])
 	})
 
 	it('names near days in words', async () => {
@@ -230,19 +253,6 @@ describe('calendar', () => {
 		})
 	})
 
-	it('opens a shared vacation link and keeps other query params', async () => {
-		history.replaceState(null, '', '/ru/2027/?c=kz,ru&from=2027-05-04&to=2027-05-07&utm_source=tg')
-		try {
-			const {container} = await renderApp()
-			expect(cell(container, '2027-05-05').dataset.range).toBe('in')
-			expect(container.querySelectorAll('[data-c][aria-pressed="true"]')).toHaveLength(2)
-			expect(location.search).toBe('?utm_source=tg')
-			expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
-		} finally {
-			history.replaceState(null, '', '/')
-		}
-	})
-
 	it('shows ISO week numbers in the month view when enabled', async () => {
 		vi.useFakeTimers({toFake: ['Date']})
 		vi.setSystemTime(new Date(2026, 10, 12, 12))
@@ -258,8 +268,6 @@ describe('calendar', () => {
 
 	it('switches views', async () => {
 		const {container, getByRole} = await renderApp()
-		fireEvent.click(getByRole('button', {name: 'Дорожки'}))
-		expect(container.querySelectorAll('[data-country="ru"]').length).toBeGreaterThan(27)
 		fireEvent.click(getByRole('button', {name: 'Месяц'}))
 		expect(container.querySelectorAll('button[data-date]').length).toBeLessThanOrEqual(31)
 	})

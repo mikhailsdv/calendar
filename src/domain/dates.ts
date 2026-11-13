@@ -41,18 +41,6 @@ export const monthOf = (date: ISODate) => Number(date.slice(5, 7))
 export const daysInMonth = (year: number, month: number) =>
 	new Date(Date.UTC(year, month, 0)).getUTCDate()
 
-export const isLeapYear = (year: number) => daysInMonth(year, 2) === 29
-
-export const minDate = (a: ISODate, b: ISODate) => (a < b ? a : b)
-export const maxDate = (a: ISODate, b: ISODate) => (a > b ? a : b)
-
-/** Все даты от from до to включительно */
-export const eachDay = (from: ISODate, to: ISODate): ISODate[] => {
-	const result: ISODate[] = []
-	for (let d = from; d <= to; d = addDays(d, 1)) result.push(d)
-	return result
-}
-
 /** Номер недели по ISO 8601 */
 export const isoWeekNumber = (date: ISODate) => {
 	const thursday = addDays(date, 4 - isoWeekday(date))

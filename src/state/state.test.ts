@@ -24,15 +24,24 @@ describe('persist', () => {
 		expect(sanitizeSettings(null, defaults, COUNTRY_IDS)).toEqual(defaults)
 		expect(sanitizeSettings('garbage', defaults, COUNTRY_IDS)).toEqual(defaults)
 		const fixed = sanitizeSettings(
-			{theme: 'pink', view: 'week', countries: ['xx', 'kz', 'kz'], budget: 999, lang: 'de'},
+			{theme: 'pink', view: 'week', countries: ['xx', 'kz', 'kz'], hoursNorm: 999, lang: 'de'},
 			defaults,
 			COUNTRY_IDS
 		)
 		expect(fixed.theme).toBe('light')
 		expect(fixed.view).toBe('year')
 		expect(fixed.countries).toEqual(['kz'])
-		expect(fixed.budget).toBe(defaults.budget)
+		expect(fixed.hoursNorm).toBe(defaults.hoursNorm)
+		expect(fixed.compare).toBe(false)
 		expect(fixed.lang).toBeNull()
+	})
+
+	it('turns comparison on for old settings with several countries', () => {
+		const old = sanitizeSettings({countries: ['ru', 'kz']}, defaults, COUNTRY_IDS)
+		expect(old.compare).toBe(true)
+		const off = sanitizeSettings({countries: ['ru', 'kz'], compare: false}, defaults, COUNTRY_IDS)
+		expect(off.compare).toBe(false)
+		expect(off.countries).toEqual(['ru', 'kz'])
 	})
 
 	it('reads and writes localStorage', () => {
@@ -116,6 +125,14 @@ describe('store', () => {
 		expect(s.selected.value).toBe('2027-05-10')
 		s.clickDay('2027-05-10')
 		expect(s.selected.value).toBeNull()
+	})
+
+	it('shows only the main country until comparison is on', () => {
+		const s = store()
+		s.updateSettings({countries: ['ru', 'kz', 'by']})
+		expect(s.countries.value.map(c => c.id)).toEqual(['ru'])
+		s.setCompare(true)
+		expect(s.countries.value.map(c => c.id)).toEqual(['ru', 'kz', 'by'])
 	})
 
 	it('moves a country to the front as the main one', () => {

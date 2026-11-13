@@ -267,11 +267,19 @@
 	opacity: 0.5;
 }
 
-.dot {
-	width: 8px;
-	height: 8px;
-	border-radius: 50%;
-	background: var(--c);
+/* «Сравнить»: пунктир, пока сравнение выключено; включённое — акцентом, как нажатый переключатель */
+.compare {
+	min-height: 34px;
+	padding: 0 14px;
+	border-style: dashed;
+	border-radius: 999px;
+}
+
+.compare[aria-pressed='true'] {
+	border-style: solid;
+	border-color: var(--accent);
+	background: color-mix(in srgb, var(--accent) 10%, var(--bg));
+	color: var(--accent-text);
 }
 
 .home {
@@ -326,16 +334,6 @@
 }
 
 /* Совет про деньги над правилами стран */
-.moneyTip {
-	max-width: 70ch;
-	margin-bottom: 16px;
-	padding: 10px 12px;
-	border-radius: var(--radius-sm);
-	background: var(--surface);
-	font-size: 14px;
-	color: var(--text-2);
-}
-
 .rules {
 	display: grid;
 	gap: 16px;

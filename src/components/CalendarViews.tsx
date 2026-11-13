@@ -1,25 +1,22 @@
 import {Fragment, type JSX} from 'preact'
-import {useEffect, useLayoutEffect, useRef, useState} from 'preact/hooks'
+import {useEffect, useLayoutEffect, useMemo, useRef, useState} from 'preact/hooks'
 
 import {track} from '../analytics/metrika'
 import type {Country} from '../data/types'
-import {type DayInfo, dayOf} from '../domain/calendar'
+import {type DayInfo, dayOf, type PeriodTotals, sumTotals, yearTotals} from '../domain/calendar'
 import {
 	addDays,
-	daysInMonth,
 	type ISODate,
 	isoWeekday,
 	isoWeekNumber,
 	monthGrid,
 	parseISO,
-	toISO,
 	weekdayOrder,
 } from '../domain/dates'
 import {type Season, seasonOf} from '../domain/seasons'
 import {fmt, formatDate, localized, useI18n, weekdayName, weekdayShort} from '../i18n'
 import {type Range, type Store, useStore} from '../state/store'
 import s from './Calendar.module.css'
-import {Flag} from './Flag'
 import {LeafIcon, SnowflakeIcon, SproutIcon, SunIcon} from './icons'
 
 export const countryColor = (id: string) => `var(--c-${id}, var(--c-fallback))`
@@ -139,7 +136,6 @@ const useCellProps = () => {
 	const range = store.mode.value === 'vacation' ? store.range.value : null
 	const hover = store.hover.value
 	const today = store.today.value
-	const showObservances = store.settings.value.showObservances
 	const weekend = store.home.value.week.weekend
 	const statusOf = useDayStatus()
 
@@ -147,9 +143,7 @@ const useCellProps = () => {
 		const infos = countries.map(c => dayOf(c, lookup, date))
 		let label: string | undefined
 		if (variant === 'big') {
-			const index = infos.findIndex(
-				info => info.entry?.holiday && (info.kind === 'holiday' || showObservances)
-			)
+			const index = infos.findIndex(info => info.entry?.holiday)
 			if (index >= 0) {
 				const holiday = countries[index]!.holidays[infos[index]!.entry!.holiday!]
 				if (holiday) label = localized(holiday.name, i18n.lang)
@@ -208,45 +202,128 @@ const seasonClass = (season: Season) => s[season]
 const withStatus = (label: string, status: string | null) =>
 	status ? `${label} — ${status}` : label
 
+/** Итоги периода для бухгалтера: дни и норма часов. Значение сверху, подпись снизу */
+const Totals = ({
+	totals,
+	norm,
+	calendar,
+	class: className,
+}: {
+	totals: PeriodTotals
+	norm: string
+	calendar?: boolean
+	class: string
+}) => {
+	const {t} = useI18n()
+	const hours = totals.hours[norm]
+	const items = [
+		calendar && {
+			key: 'calendar',
+			title: t.quarter.calendarFull,
+			label: t.quarter.calendar,
+			value: totals.workdays + totals.offdays,
+		},
+		{key: 'work', title: t.compare.workdays, label: t.quarter.work, value: totals.workdays},
+		{key: 'off', title: t.compare.offdays, label: t.quarter.off, value: totals.offdays},
+		hours != null && {
+			key: 'hours',
+			title: fmt(t.compare.hours, {n: norm}),
+			label: t.quarter.hours,
+			value: hours,
+		},
+	].filter(item => item !== false && item !== undefined)
+	return (
+		<dl class={className}>
+			{items.map(item => (
+				<div key={item.key} data-k={item.key} title={item.title}>
+					<dt>{item.label}</dt>
+					<dd>{item.value}</dd>
+				</div>
+			))}
+		</dl>
+	)
+}
+
+const QUARTERS = [0, 1, 2, 3]
+
+const quarterMonths = (q: number) => [1, 2, 3].map(i => q * 3 + i)
+
+/** Итоги месяцев по основной стране; без данных за год — null, чтобы не вводить в заблуждение */
+const useMonthTotals = () => {
+	const store = useStore()
+	const home = store.home.value
+	const lookup = store.lookup.value
+	const year = store.year.value
+	return useMemo(() => {
+		const data = lookup(home.id, year)
+		return data ? yearTotals(home, data, year).months : null
+	}, [home, lookup, year])
+}
+
 export const YearView = () => {
 	const store = useStore()
 	const {t} = useI18n()
 	const year = store.year.value
 	const cellProps = useCellProps()
 	const hemisphere = store.home.value.seasons
+	const norm = String(store.settings.value.hoursNorm)
+	const months = useMonthTotals()
+	const weekStart = store.weekStart.value
+	const showWeeks = store.settings.value.showWeekNumbers
 
 	return (
 		<div class={s.yearGrid}>
-			{Array.from({length: 12}, (_, i) => i + 1).map(month => {
-				const season = seasonOf(month, hemisphere)
-				const Icon = SEASON_ICON[season]
+			{QUARTERS.map(q => {
+				const list = quarterMonths(q)
+				const sum = months ? sumTotals(list.map(m => months[m - 1]!)) : null
 				return (
-					<section key={month} class={`${s.monthCard} ${seasonClass(season)}`}>
-						<h3>
-							<button
-								type="button"
-								class={s.monthHead}
-								onClick={() => {
-									store.month.value = month
-									store.setView('month')
-									track('view_change', {view: 'month'})
-								}}
-							>
-								<span>{t.months[month - 1]}</span>
-								<Icon />
-							</button>
-						</h3>
-						<div class={s.miniGrid}>
-							<WeekdayRow />
-							{monthGrid(year, month, store.weekStart.value)
-								.flat()
-								.map((date, i) =>
-									date ? (
-										<DayCell key={date} {...cellProps(date, 'mini')} />
-									) : (
-										<span key={`e${i}`} />
-									)
-								)}
+					<section key={q} class={s.quarter} aria-labelledby={`q${q + 1}`}>
+						<div class={s.quarterHead}>
+							<h3 id={`q${q + 1}`}>{t.quarter.names[q]}</h3>
+							{sum ? <Totals class={s.quarterTotals} totals={sum} norm={norm} calendar /> : null}
+						</div>
+						<div class={s.quarterMonths}>
+							{list.map(month => {
+								const season = seasonOf(month, hemisphere)
+								const Icon = SEASON_ICON[season]
+								return (
+									<section key={month} class={`${s.monthCard} ${seasonClass(season)}`}>
+										<h4>
+											<button
+												type="button"
+												class={s.monthHead}
+												onClick={() => {
+													store.month.value = month
+													store.setView('month')
+													track('view_change', {view: 'month'})
+												}}
+											>
+												<span>{t.months[month - 1]}</span>
+												<Icon />
+											</button>
+										</h4>
+										<div class={`${s.miniGrid} ${showWeeks ? s.withWeeks : ''}`}>
+											{showWeeks ? <span aria-hidden="true" /> : null}
+											<WeekdayRow />
+											{monthGrid(year, month, weekStart).map((row, r) => (
+												<Fragment key={r}>
+													{showWeeks ? <WeekNum row={row} weekStart={weekStart} /> : null}
+													{row.map((date, i) =>
+														date ? (
+															<DayCell key={date} {...cellProps(date, 'mini')} />
+														) : (
+															<span key={`e${i}`} />
+														)
+													)}
+												</Fragment>
+											))}
+										</div>
+										{months ? (
+											<Totals class={s.monthTotals} totals={months[month - 1]!} norm={norm} />
+										) : null}
+									</section>
+								)
+							})}
 						</div>
 					</section>
 				)
@@ -262,6 +339,16 @@ const rowWeek = (row: (ISODate | null)[], weekStart: 1 | 7) => {
 	return isoWeekNumber(monday)
 }
 
+const WeekNum = ({row, weekStart}: {row: (ISODate | null)[]; weekStart: 1 | 7}) => {
+	const {t} = useI18n()
+	const week = rowWeek(row, weekStart)
+	return (
+		<span class={s.weekNum} title={fmt(t.details.week, {n: week})}>
+			{week}
+		</span>
+	)
+}
+
 export const MonthView = () => {
 	const store = useStore()
 	const {t} = useI18n()
@@ -272,6 +359,10 @@ export const MonthView = () => {
 	const cellProps = useCellProps()
 	const season = seasonOf(month, store.home.value.seasons)
 	const Icon = SEASON_ICON[season]
+	const norm = String(store.settings.value.hoursNorm)
+	const months = useMonthTotals()
+	const quarter = Math.floor((month - 1) / 3)
+	const quarterSum = months ? sumTotals(quarterMonths(quarter).map(m => months[m - 1]!)) : null
 
 	return (
 		<section class={`${s.monthView} ${seasonClass(season)}`}>
@@ -280,126 +371,37 @@ export const MonthView = () => {
 				<span>
 					{t.months[month - 1]} {year}
 				</span>
-				<small>{t.seasons[season]}</small>
+				<small>
+					{t.quarter.names[quarter]} · {t.seasons[season]}
+				</small>
 			</h3>
 			<div class={`${s.bigGrid} ${showWeeks ? s.withWeeks : ''}`}>
 				{showWeeks ? <span aria-hidden="true" /> : null}
 				<WeekdayRow />
-				{monthGrid(year, month, weekStart).map((row, r) => {
-					const week = rowWeek(row, weekStart)
-					return (
-						<Fragment key={r}>
-							{showWeeks ? (
-								<span class={s.weekNum} title={fmt(t.details.week, {n: week})}>
-									{week}
-								</span>
-							) : null}
-							{row.map((date, i) =>
-								date ? <DayCell key={date} {...cellProps(date, 'big')} /> : <span key={`e${i}`} />
-							)}
-						</Fragment>
-					)
-				})}
+				{monthGrid(year, month, weekStart).map((row, r) => (
+					<Fragment key={r}>
+						{showWeeks ? <WeekNum row={row} weekStart={weekStart} /> : null}
+						{row.map((date, i) =>
+							date ? <DayCell key={date} {...cellProps(date, 'big')} /> : <span key={`e${i}`} />
+						)}
+					</Fragment>
+				))}
 			</div>
-		</section>
-	)
-}
-
-export const LanesView = () => {
-	const store = useStore()
-	const i18n = useI18n()
-	const {t} = i18n
-	const year = store.year.value
-	const month = store.month.value
-	const countries = store.countries.value
-	const lookup = store.lookup.value
-	const days = Array.from({length: daysInMonth(year, month)}, (_, i) => toISO(year, month, i + 1))
-	const selected = store.mode.value === 'view' ? store.selected.value : null
-	const pairs = transferPairs(store, selected)
-	const range = store.mode.value === 'vacation' ? store.range.value : null
-	const hover = store.hover.value
-	const home = store.home.value
-	const today = store.today.value
-	const season = seasonOf(month, home.seasons)
-	const Icon = SEASON_ICON[season]
-	const statusOf = useDayStatus()
-
-	return (
-		<section class={`${s.lanesWrap} ${seasonClass(season)}`}>
-			<h3 class={s.band}>
-				<Icon />
-				<span>
-					{t.months[month - 1]} {year}
-				</span>
-				<small>{t.seasons[season]}</small>
-			</h3>
-			<div class={s.lanesScroll}>
-				<div class={s.lanes} style={{'--days': days.length}}>
-					<span />
-					{days.map(date => (
-						<span
-							key={date}
-							class={`${s.laneHead} ${dayOf(home, lookup, date).off ? s.laneHeadWeekend : ''} ${date === today ? s.laneHeadToday : ''}`}
-						>
-							<b>{parseISO(date).day}</b>
-							{weekdayShort(i18n, isoWeekday(date))}
-						</span>
-					))}
-					{countries.map(country => (
-						<LaneRow
-							key={country.id}
-							country={country}
-							days={days}
-							render={date => {
-								const info = dayOf(country, lookup, date)
-								const r = rangeState(date, range, hover)
-								const isPair = pairs.some(
-									p => p.country.id === country.id && (p.from === date || p.to === date)
-								)
-								return (
-									<button
-										type="button"
-										key={date}
-										class={s.lane}
-										data-date={date}
-										data-country={country.id}
-										data-k={info.kind}
-										data-range={r?.kind}
-										data-pair={isPair && date !== selected ? '' : undefined}
-										aria-pressed={date === selected}
-										aria-label={withStatus(
-											`${localized(country.name, i18n.lang)}: ${formatDate(i18n, date)}`,
-											statusOf(country, info)
-										)}
-										data-c={country.id}
-									/>
-								)
-							}}
-						/>
-					))}
+			{months && quarterSum ? (
+				<div class={s.monthFoot}>
+					<div class={s.footGroup}>
+						<h4>{t.months[month - 1]}</h4>
+						<Totals class={s.footTotals} totals={months[month - 1]!} norm={norm} calendar />
+					</div>
+					<div class={`${s.footGroup} ${s.footQuarter}`}>
+						<h4>{t.quarter.names[quarter]}</h4>
+						<Totals class={s.footTotals} totals={quarterSum} norm={norm} calendar />
+					</div>
 				</div>
-			</div>
+			) : null}
 		</section>
 	)
 }
-
-const LaneRow = ({
-	country,
-	days,
-	render,
-}: {
-	country: Country
-	days: ISODate[]
-	render: (date: ISODate) => JSX.Element
-}) => (
-	<>
-		<span class={s.laneLabel}>
-			<Flag code={country.id} />
-			{country.iso}
-		</span>
-		{days.map(render)}
-	</>
-)
 
 /** Дуги от дня-источника переноса к дню-получателю */
 const TransferArrows = ({container}: {container: {current: HTMLDivElement | null}}) => {
@@ -418,16 +420,11 @@ const TransferArrows = ({container}: {container: {current: HTMLDivElement | null
 		}
 		const compute = () => {
 			const base = root.getBoundingClientRect()
-			const find = (date: ISODate, country: string) =>
-				root.querySelector<HTMLElement>(
-					view === 'lanes'
-						? `[data-date="${date}"][data-country="${country}"]`
-						: `[data-date="${date}"]`
-				)
+			const find = (date: ISODate) => root.querySelector<HTMLElement>(`[data-date="${date}"]`)
 			const next: {d: string; color: string; arrow: string}[] = []
 			for (const p of pairs) {
-				const a = find(p.from, p.country.id)
-				const b = find(p.to, p.country.id)
+				const a = find(p.from)
+				const b = find(p.to)
 				if (!a || !b) continue
 				const ra = a.getBoundingClientRect()
 				const rb = b.getBoundingClientRect()
@@ -587,19 +584,15 @@ export const CalendarArea = () => {
 		const step = {
 			ArrowLeft: -1,
 			ArrowRight: 1,
-			ArrowUp: view === 'lanes' ? 0 : -7,
-			ArrowDown: view === 'lanes' ? 0 : 7,
+			ArrowUp: -7,
+			ArrowDown: 7,
 		}[e.key]
 		if (!date || !step) return
 		e.preventDefault()
 		const next = addDays(date, step)
 		store.goTo(next)
 		requestAnimationFrame(() => {
-			const selector =
-				view === 'lanes'
-					? `[data-date="${next}"][data-country="${(document.activeElement as HTMLElement)?.dataset.country}"]`
-					: `[data-date="${next}"]`
-			ref.current?.querySelector<HTMLElement>(selector)?.focus()
+			ref.current?.querySelector<HTMLElement>(`[data-date="${next}"]`)?.focus()
 		})
 	}
 
@@ -612,7 +605,7 @@ export const CalendarArea = () => {
 			onPointerLeave={() => (store.hover.value = null)}
 			onKeyDown={onKeyDown}
 		>
-			{view === 'year' ? <YearView /> : view === 'month' ? <MonthView /> : <LanesView />}
+			{view === 'year' ? <YearView /> : <MonthView />}
 			<TransferArrows container={ref} />
 		</div>
 	)
@@ -624,39 +617,23 @@ export const Legend = () => {
 	const store = useStore()
 	const home = store.home.value
 	const others = store.countries.value.slice(1)
-	const lanes = store.settings.value.view === 'lanes'
+	// При одной стране «красное — выходной» понятно и без подписи
+	if (!others.length) return null
 	return (
 		<div class={s.legend} aria-label={t.legend.title}>
 			<ul>
-				{lanes ? (
-					<>
-						<li>
-							<span class={`${s.swatch} ${s.swatchHoliday}`} data-c={home.id} aria-hidden="true" />
-							{t.legend.holiday}
-						</li>
-						<li>
-							<span class={`${s.swatch} ${s.swatchWeekend}`} data-c={home.id} aria-hidden="true" />
-							{t.legend.weekend}
-						</li>
-					</>
-				) : (
-					<>
-						<li>
-							<span class={`${s.swatch} ${s.swatchOff}`} aria-hidden="true" />
-							{fmt(t.legend.off, {country: localized(home.name, lang)})}
-						</li>
-						{others.length ? (
-							<li>
-								<span class={s.legendDots} aria-hidden="true">
-									{others.map(c => (
-										<i key={c.id} data-c={c.id} />
-									))}
-								</span>
-								{t.legend.other}
-							</li>
-						) : null}
-					</>
-				)}
+				<li>
+					<span class={`${s.swatch} ${s.swatchOff}`} aria-hidden="true" />
+					{fmt(t.legend.off, {country: localized(home.name, lang)})}
+				</li>
+				<li>
+					<span class={s.legendDots} aria-hidden="true">
+						{others.map(c => (
+							<i key={c.id} data-c={c.id} />
+						))}
+					</span>
+					{t.legend.other}
+				</li>
 			</ul>
 		</div>
 	)

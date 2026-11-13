@@ -22,20 +22,10 @@
 	align-items: flex-start;
 	justify-content: space-between;
 	gap: 8px;
-	min-height: 36px;
 }
 
-/* Однострочный заголовок («Отпуск») по высоте равен кнопкам, поэтому стоит с ними на одной линии */
-.headRow > .title {
-	display: flex;
-	align-items: center;
-	min-height: 36px;
-}
-
-/* Даты отпуска и подпись под ними: первая строка по центру кнопок высотой 32 px в ряду 36 px */
 .titleBlock {
 	min-width: 0;
-	padding-top: 6px;
 }
 
 .headActions {
@@ -43,21 +33,10 @@
 	align-items: center;
 	gap: 4px;
 	min-width: 0;
-	min-height: 36px;
 }
 
 .headActions:empty {
 	display: none;
-}
-
-.navBtn {
-	min-width: 0;
-	color: var(--accent-text);
-}
-
-.navBtn span {
-	overflow: hidden;
-	text-overflow: ellipsis;
 }
 
 @media (min-width: 1024px) {
@@ -74,8 +53,13 @@
 	}
 
 	.grabber,
-	.navBtn,
 	.close {
+		display: none;
+	}
+
+	/* Пустое тело (отпуск без дат) не добавляет отступ под шапкой. На телефоне оно остаётся:
+	   его нижний отступ держит шторку над краем экрана */
+	.body:empty {
 		display: none;
 	}
 }
@@ -220,11 +204,6 @@
 	color: var(--text);
 }
 
-.empty {
-	font-size: 14px;
-	color: var(--text-2);
-}
-
 .stats {
 	display: flex;
 	flex-wrap: wrap;
@@ -233,110 +212,11 @@
 	color: var(--text-2);
 }
 
-.ratio {
-	margin-left: auto;
-	padding: 1px 8px;
-	border-radius: 999px;
-	background: var(--accent-bg);
-	color: var(--accent-text);
-	font-weight: 600;
-	font-size: 13px;
-	font-variant-numeric: tabular-nums;
-}
-
-.hint {
-	padding: 10px 12px;
-	border-radius: var(--radius-sm);
-	background: var(--accent-bg);
-	font-size: 14px;
-}
-
-.hint b {
-	display: block;
-	margin-bottom: 2px;
-	color: var(--accent-text);
-}
-
-.hintRow {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
-}
-
-.navigator {
-	display: flex;
-	flex-direction: column;
-	gap: 10px;
-	padding-top: 12px;
-	border-top: 1px solid var(--border);
-}
-
 .navTitle {
 	display: flex;
 	align-items: center;
 	gap: 6px;
 	font-weight: 650;
-}
-
-.horizon {
-	margin: 2px 0 0 24px;
-	font-size: 12px;
-	color: var(--text-2);
-}
-
-.navTitle svg {
-	width: 18px;
-	height: 18px;
-	color: var(--accent);
-}
-
-.controls {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	font-size: 13px;
-	color: var(--text-2);
-}
-
-.controls > span {
-	flex: none;
-}
-
-/* Выбор страны — справа от счётчика и забирает всю оставшуюся ширину */
-.controls select {
-	flex: 1;
-	min-width: 0;
-	padding: 0 26px 0 10px;
-	background-position: right 6px center;
-}
-
-/* Счётчик дней — та же «дорожка», что у выбора года и месяца: серая подложка, кнопки без рамки */
-.stepper {
-	display: inline-flex;
-	align-items: center;
-	padding: 2px;
-	border-radius: var(--radius-sm);
-	background: var(--surface-2);
-}
-
-.stepper :global(.btn) {
-	color: var(--text-2);
-}
-
-@media (hover: hover) {
-	.stepper :global(.btn:not(:disabled):hover) {
-		background: var(--bg);
-		color: var(--text);
-	}
-}
-
-.stepper output {
-	min-width: 3ch;
-	text-align: center;
-	font-weight: 600;
-	color: var(--text);
-	font-variant-numeric: tabular-nums;
 }
 
 .windows {
@@ -389,46 +269,4 @@
 
 .window .flags {
 	display: flex;
-}
-
-/* Кнопка «Поделиться» после копирования ссылки */
-.copied {
-	color: var(--accent-text);
-}
-
-/* Деньги за отпуск: плюс — зелёный, минус — красный, ноль — нейтральный */
-.money {
-	flex: none;
-	margin-left: auto;
-	padding: 1px 8px;
-	border-radius: 999px;
-	background: var(--surface-2);
-	color: var(--text-2);
-	font-weight: 600;
-	font-size: 13px;
-	font-variant-numeric: tabular-nums;
-	white-space: nowrap;
-}
-
-.moneyUp {
-	background: var(--good-bg);
-	color: var(--good-text);
-}
-
-.moneyDown {
-	background: var(--danger-bg);
-	color: var(--danger-text);
-}
-
-.note {
-	font-size: 12px;
-	color: var(--text-3);
-}
-
-.goal {
-	display: flex;
-}
-
-.goal button {
-	flex: 1;
 }

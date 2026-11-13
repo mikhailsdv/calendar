@@ -1,13 +1,12 @@
 import {effect} from '@preact/signals'
 import {useEffect, useRef} from 'preact/hooks'
 
-import {initMetrika, track} from '../analytics/metrika'
+import {initMetrika} from '../analytics/metrika'
 import {browserSignals, detectCountry} from '../app/detectCountry'
 import {pathFor} from '../app/routes'
-import {readShared} from '../app/share'
 import {MAX_COUNTRIES} from '../config'
 import {COUNTRY_IDS, hasYear, YEARS} from '../data/loader'
-import {diffDays, monthOf, todayISO, yearOf} from '../domain/dates'
+import {monthOf, todayISO, yearOf} from '../domain/dates'
 import {fmt, localized, useI18n} from '../i18n'
 import {calendarTitle, countryForm, countryTitle} from '../seo/title'
 import {loadSettings, saveSettings} from '../state/persist'
@@ -52,27 +51,6 @@ export const CalendarPage = ({
 		}
 		store.month.value = store.year.value === todayYear ? monthOf(today) : 1
 		store.ensureAround(store.year.value)
-
-		// Ссылка на отпуск: показываем те же страны и даты. Страны не сохраняются,
-		// пока человек сам что-то не поменяет
-		const shared = readShared(location.search, COUNTRY_IDS, YEARS)
-		if (shared) {
-			if (shared.countries.length) {
-				store.settings.value = {...store.settings.value, countries: shared.countries}
-			}
-			store.setRange(shared.from, shared.to)
-			track('shared_link_open', {
-				days: diffDays(shared.from, shared.to) + 1,
-				countries: store.settings.value.countries.length,
-			})
-		}
-		// Убираем из адреса только свои параметры: UTM-метки нужны Метрике
-		const query = new URLSearchParams(location.search)
-		if (['c', 'from', 'to'].some(key => query.has(key))) {
-			for (const key of ['c', 'from', 'to']) query.delete(key)
-			const rest = query.toString()
-			history.replaceState(history.state, '', location.pathname + (rest ? `?${rest}` : ''))
-		}
 
 		// Сохраняем только изменения пользователя: иначе первая открытая страница
 		// навсегда зафиксировала бы основную страну по своему языку

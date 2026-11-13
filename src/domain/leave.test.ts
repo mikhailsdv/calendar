@@ -8,7 +8,6 @@ describe('computeLeave', () => {
 		const result = computeLeave(country('ru'), lookupAll, '2027-05-04', '2027-05-07')
 		expect(result.charged).toBe(4)
 		expect(result.rest).toEqual({from: '2027-05-01', to: '2027-05-10', days: 10})
-		expect(result.ratio).toBe(2.5)
 	})
 
 	it('charges transferred days off but not holidays in Russia', () => {

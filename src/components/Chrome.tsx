@@ -11,6 +11,7 @@ import {useStore} from '../state/store'
 import {Flag, LANG_FLAG} from './Flag'
 import {ChevronLeft, ChevronRight, MoonIcon, PrinterIcon, SettingsIcon, SunIcon} from './icons'
 import s from './Layout.module.css'
+import {revealDate} from './reveal'
 
 export const LangSwitcher = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 	const store = useStore()
@@ -165,15 +166,7 @@ export const Toolbar = () => {
 		const today = store.today.value
 		if (!today || !YEARS.includes(yearOf(today))) return
 		store.goTo(today)
-		// Ждём перерисовку: в годовом виде дата может быть далеко внизу, в дорожках — правее
-		requestAnimationFrame(() => {
-			const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
-			document.querySelector(`[data-date="${today}"]`)?.scrollIntoView({
-				block: 'center',
-				inline: 'center',
-				behavior: reduce ? 'auto' : 'smooth',
-			})
-		})
+		revealDate(today)
 	}
 
 	return (
@@ -225,7 +218,7 @@ export const Toolbar = () => {
 				</div>
 			</div>
 			<div class={`segmented ${s.views}`} role="group" aria-label={t.toolbar.view}>
-				{(['year', 'month', 'lanes'] as const).map(v => (
+				{(['year', 'month'] as const).map(v => (
 					<button
 						key={v}
 						type="button"
@@ -261,10 +254,15 @@ export const Toolbar = () => {
 	)
 }
 
+/**
+ * Выбор стран. По умолчанию одна страна: нажатие на чип делает её основной.
+ * «Сравнить» включает наложение: чипы добавляют и убирают страны, выбор помнится в localStorage
+ */
 export const CountryChips = () => {
 	const store = useStore()
 	const {t, lang} = useI18n()
-	const active = store.settings.value.countries
+	const {countries: saved, compare} = store.settings.value
+	const active = compare ? saved : saved.slice(0, 1)
 	return (
 		<div class={s.chips} role="group" aria-label={t.toolbar.countries}>
 			{COUNTRY_IDS.map(id => {
@@ -278,6 +276,12 @@ export const CountryChips = () => {
 						aria-pressed={pressed}
 						data-c={id}
 						onClick={() => {
+							if (!compare) {
+								if (pressed) return
+								store.setHome(id)
+								track('home_change', {country: id})
+								return
+							}
 							const ok = store.toggleCountry(id)
 							if (!ok) track('country_limit_hit', {country: id})
 							else
@@ -290,10 +294,23 @@ export const CountryChips = () => {
 					>
 						<Flag code={id} />
 						{localized(country.name, lang)}
-						{pressed && active[0] === id ? <span class={s.home}>· {t.toolbar.home}</span> : null}
+						{compare && pressed && active[0] === id ? (
+							<span class={s.home}>· {t.toolbar.home}</span>
+						) : null}
 					</button>
 				)
 			})}
+			<button
+				type="button"
+				class={`btn btn-sm ${s.compare}`}
+				aria-pressed={compare}
+				onClick={() => {
+					store.setCompare(!compare)
+					track('compare_toggle', {state: compare ? 'off' : 'on'})
+				}}
+			>
+				{t.toolbar.compare}
+			</button>
 			{store.limitHit.value ? (
 				<span class={s.limit} role="status">
 					{fmt(t.toolbar.countryLimit, {n: MAX_COUNTRIES})}
@@ -359,6 +376,20 @@ export const SettingsDialog = () => {
 				</select>
 			</label>
 			<label class={s.field}>
+				{t.settings.workWeek}
+				<select
+					value={String(settings.workWeek)}
+					onChange={e =>
+						store.updateSettings({
+							workWeek: Number((e.target as HTMLSelectElement).value) as 5 | 6,
+						})
+					}
+				>
+					<option value="5">{t.settings.fiveDay}</option>
+					<option value="6">{t.settings.sixDay}</option>
+				</select>
+			</label>
+			<label class={s.field}>
 				{t.settings.hoursNorm}
 				<select
 					value={String(settings.hoursNorm)}
@@ -374,16 +405,6 @@ export const SettingsDialog = () => {
 						</option>
 					))}
 				</select>
-			</label>
-			<label class={s.check}>
-				<input
-					type="checkbox"
-					checked={settings.showObservances}
-					onChange={e =>
-						store.updateSettings({showObservances: (e.target as HTMLInputElement).checked})
-					}
-				/>
-				{t.settings.showObservances}
 			</label>
 			<label class={s.check}>
 				<input

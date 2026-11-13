@@ -15,7 +15,7 @@
 	"view_change": {
 		"description": "Переключён вид календаря",
 		"params": {
-			"view": "year | month | lanes"
+			"view": "year | month"
 		}
 	},
 	"year_change": {
@@ -50,6 +50,12 @@
 			"country": "id страны"
 		}
 	},
+	"compare_toggle": {
+		"description": "Включено или выключено сравнение стран",
+		"params": {
+			"state": "on | off"
+		}
+	},
 	"day_open": {
 		"description": "Открыты подробности дня",
 		"params": {
@@ -73,34 +79,6 @@
 		"description": "Выделение отпуска сброшено",
 		"params": {}
 	},
-	"navigator_budget_change": {
-		"description": "Изменён бюджет дней в навигаторе",
-		"params": {
-			"budget": "дней отпуска"
-		}
-	},
-	"navigator_goal_change": {
-		"description": "В навигаторе выбрана цель: отдых или деньги",
-		"params": {
-			"goal": "rest | money"
-		}
-	},
-	"navigator_apply": {
-		"description": "Выбрано окно, предложенное навигатором",
-		"params": {
-			"country": "id страны",
-			"rest": "дней отдыха",
-			"charged": "списано дней"
-		}
-	},
-	"magnet_hint_apply": {
-		"description": "Принята подсказка «можно выгоднее»",
-		"params": {
-			"country": "id страны",
-			"rest_gain": "дней отдыха прибавилось",
-			"charged_saved": "дней сэкономлено"
-		}
-	},
 	"settings_open": {
 		"description": "Открыты настройки",
 		"params": {}
@@ -114,7 +92,7 @@
 	"today_click": {
 		"description": "Нажата кнопка «Сегодня»",
 		"params": {
-			"view": "year | month | lanes"
+			"view": "year | month"
 		}
 	},
 	"print_click": {
@@ -136,21 +114,6 @@
 		"params": {
 			"state": "expand | collapse | close",
 			"via": "tap | drag | outside | keyboard"
-		}
-	},
-	"share_click": {
-		"description": "Нажата кнопка «Поделиться» у выбранного отпуска",
-		"params": {
-			"method": "native | clipboard",
-			"days": "календарных дней в отпуске",
-			"countries": "сколько стран выбрано"
-		}
-	},
-	"shared_link_open": {
-		"description": "Открыта ссылка на чужой отпуск",
-		"params": {
-			"days": "календарных дней в отпуске",
-			"countries": "сколько стран в ссылке"
 		}
 	},
 	"upcoming_open": {

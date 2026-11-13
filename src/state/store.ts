@@ -6,6 +6,7 @@ import {COUNTRY_BY_LANG, FALLBACK_COUNTRY} from '../app/detectCountry'
 import {type Lang, MAX_COUNTRIES} from '../config'
 import {COUNTRIES, COUNTRY_IDS, hasYear, loadYear, YEARS} from '../data/loader'
 import type {YearData, YearLookup} from '../data/types'
+import {withSixDayWeek} from '../domain/calendar'
 import type {ISODate} from '../domain/dates'
 import {monthOf, yearOf} from '../domain/dates'
 import type {Settings, Theme, View} from './persist'
@@ -25,13 +26,12 @@ export const defaultSettings = (lang: Lang, country: string | null = null): Sett
 	theme: 'light',
 	lang: null,
 	countries: [country ?? COUNTRY_BY_LANG[lang] ?? FALLBACK_COUNTRY],
+	compare: false,
 	view: 'year',
 	weekStart: 'auto',
 	hoursNorm: 40,
-	showObservances: true,
+	workWeek: 5,
 	showWeekNumbers: false,
-	budget: 5,
-	navigatorGoal: 'rest',
 })
 
 export type YearCache = Record<string, Record<number, YearData>>
@@ -58,11 +58,13 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 	const yearData = signal<YearCache>(years)
 	const settingsOpen = signal(false)
 	const limitHit = signal(false)
-	const navigatorCountry = signal<string | null>(null)
 
-	const countries = computed(() =>
-		settings.value.countries.map(id => COUNTRIES[id]).filter(c => c != null)
-	)
+	// Без сравнения на календаре только основная страна. При шестидневке страны получают её правила
+	const countries = computed(() => {
+		const {countries: ids, compare, workWeek} = settings.value
+		const list = (compare ? ids : ids.slice(0, 1)).map(id => COUNTRIES[id]).filter(c => c != null)
+		return workWeek === 6 ? list.map(withSixDayWeek) : list
+	})
 	const home = computed(() => countries.value[0] ?? COUNTRIES[COUNTRY_IDS[0]!]!)
 	const weekStart = computed(() =>
 		settings.value.weekStart === 'auto' ? home.value.week.start : settings.value.weekStart
@@ -75,7 +77,7 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 	const pending = new Set<string>()
 
 	/** Догружает данные года для активных стран; уже загруженное не трогает */
-	const ensureYear = async (y: number, ids = settings.value.countries) => {
+	const ensureYear = async (y: number, ids = countries.value.map(c => c.id)) => {
 		const missing = ids.filter(
 			id => !yearData.value[id]?.[y] && hasYear(id, y) && !pending.has(`${id}/${y}`)
 		)
@@ -144,6 +146,12 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 		return true
 	}
 
+	const setCompare = (on: boolean) => {
+		limitHit.value = false
+		updateSettings({compare: on})
+		ensureAround(year.value)
+	}
+
 	const setHome = (id: string) => {
 		const rest = settings.value.countries.filter(c => c !== id)
 		updateSettings({countries: [id, ...rest].slice(0, MAX_COUNTRIES)})
@@ -205,7 +213,6 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 		yearData,
 		settingsOpen,
 		limitHit,
-		navigatorCountry,
 		pageCountry,
 		countries,
 		home,
@@ -219,6 +226,7 @@ export const createStore = ({lang, year: initialYear, years, country = null}: St
 		shiftMonth,
 		toggleCountry,
 		setHome,
+		setCompare,
 		setMode,
 		clickDay,
 		setRange,

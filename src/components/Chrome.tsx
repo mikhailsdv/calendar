@@ -318,7 +318,7 @@ export const CountryPicker = () => {
 			{open ? (
 				<div id="country-menu" class={s.countryMenu} role="group" aria-label={t.toolbar.countries}>
 					<p class={s.countryHint}>
-						{full ? fmt(t.toolbar.countryLimit, {n: MAX_COUNTRIES}) : t.toolbar.countriesHint}
+						{t.toolbar.countriesHint}
 					</p>
 					<ul>
 						{COUNTRY_IDS.map(id => {

@@ -33,7 +33,6 @@ const be: Dict = {
 		mode: 'Рэжым',
 		modes: {view: 'Прагляд', vacation: 'Адпачынак'},
 		countries: 'Краіны',
-		countryLimit: 'Можна выбраць да {n} краін адначасова',
 		home: 'асноўная',
 		makeHome: 'зрабіць асноўнай',
 		countriesHint: 'Адзначце некалькі, каб параўнаць',

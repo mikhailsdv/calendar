@@ -55,7 +55,6 @@ const ru = {
 		mode: 'Режим',
 		modes: {view: 'Просмотр', vacation: 'Отпуск'},
 		countries: 'Страны',
-		countryLimit: 'Можно выбрать до {n} стран одновременно',
 		home: 'основная',
 		makeHome: 'сделать основной',
 		countriesHint: 'Отметьте несколько, чтобы сравнить',

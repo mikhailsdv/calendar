@@ -33,7 +33,6 @@ const kk: Dict = {
 		mode: 'Режим',
 		modes: {view: 'Қарау', vacation: 'Демалыс'},
 		countries: 'Елдер',
-		countryLimit: 'Бір уақытта {n} елге дейін таңдауға болады',
 		home: 'негізгі',
 		makeHome: 'негізгі ету',
 		countriesHint: 'Салыстыру үшін бірнешеуін белгілеңіз',

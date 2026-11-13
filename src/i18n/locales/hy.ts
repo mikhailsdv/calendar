@@ -33,7 +33,6 @@ const hy: Dict = {
 		mode: 'Ռեժիմ',
 		modes: {view: 'Դիտում', vacation: 'Արձակուրդ'},
 		countries: 'Երկրներ',
-		countryLimit: 'Միաժամանակ կարելի է ընտրել մինչև {n} երկիր',
 		home: 'հիմնական',
 		makeHome: 'դարձնել հիմնական',
 		countriesHint: 'Համեմատելու համար նշեք մի քանիսը',

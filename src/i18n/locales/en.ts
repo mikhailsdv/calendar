@@ -33,7 +33,6 @@ const en: Dict = {
 		mode: 'Mode',
 		modes: {view: 'Browse', vacation: 'Vacation'},
 		countries: 'Countries',
-		countryLimit: 'You can pick up to {n} countries at once',
 		home: 'main',
 		makeHome: 'make main',
 		countriesHint: 'Check several to compare',

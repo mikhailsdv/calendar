@@ -33,7 +33,6 @@ const uk: Dict = {
 		mode: 'Режим',
 		modes: {view: 'Перегляд', vacation: 'Відпустка'},
 		countries: 'Країни',
-		countryLimit: 'Можна вибрати до {n} країн одночасно',
 		home: 'основна',
 		makeHome: 'зробити основною',
 		countriesHint: 'Позначте кілька, щоб порівняти',

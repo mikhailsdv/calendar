@@ -103,6 +103,8 @@
 html {
 	-webkit-text-size-adjust: 100%;
 	text-size-adjust: 100%;
+	/* Без зума двойным тапом: быстрые тапы по дням не увеличивают страницу, щипок работает */
+	touch-action: manipulation;
 }
 
 body {

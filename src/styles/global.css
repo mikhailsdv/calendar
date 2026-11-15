@@ -17,9 +17,6 @@
 	--off-border: #f7e1df;
 	--holiday-bg: #fbe2e0;
 	--off-text: #c4423b;
-	--danger-bg: #fdeceb;
-	--danger-bg-hover: #fadbd8;
-	--danger-text: #b8372f;
 	--on-accent: #ffffff;
 	--flag-outline: rgba(0, 0, 0, 0.12);
 	--warning-bg: #fdf3dc;
@@ -71,9 +68,6 @@
 	--off-border: #3a2628;
 	--holiday-bg: #36201f;
 	--off-text: #f0928a;
-	--danger-bg: #3a2123;
-	--danger-bg-hover: #4a2729;
-	--danger-text: #f6a39c;
 	--on-accent: #16142a;
 	--flag-outline: rgba(255, 255, 255, 0.16);
 	--warning-bg: #3a2f14;
@@ -243,13 +237,6 @@ button {
 	background: transparent;
 }
 
-.btn-danger {
-	border-color: transparent;
-	background: var(--danger-bg);
-	color: var(--danger-text);
-	font-weight: 500;
-}
-
 .btn-sm {
 	min-height: 32px;
 	padding: 0 10px;
@@ -270,9 +257,6 @@ button {
 	.btn-primary:hover {
 		background: var(--accent);
 		filter: brightness(1.08);
-	}
-	.btn-danger:hover {
-		background: var(--danger-bg-hover);
 	}
 }
 

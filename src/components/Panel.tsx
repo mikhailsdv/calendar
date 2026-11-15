@@ -345,7 +345,7 @@ export const Panel = () => {
 					{range ? (
 						<button
 							type="button"
-							class="btn btn-danger btn-sm btn-icon"
+							class={s.clear}
 							aria-label={t.vacation.clear}
 							title={t.vacation.clear}
 							onClick={close}

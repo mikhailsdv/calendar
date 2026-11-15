@@ -181,9 +181,12 @@ describe('calendar', () => {
 	it('closes the country list on a click outside but not inside', async () => {
 		const app = await renderApp()
 		const menu = openCountries(app)
-		fireEvent.pointerDown(checkbox(menu, /Армения/))
+		fireEvent.click(checkbox(menu, /Армения/))
 		expect(app.queryByRole('group', {name: 'Страны'})).not.toBeNull()
-		fireEvent.pointerDown(document.body)
+		// Клик мимо меню попадает в прозрачную подложку
+		const picker = app.getByRole('group', {name: 'Страны'}).parentElement!
+		const backdrop = picker.querySelector('[aria-hidden="true"]')!
+		fireEvent.click(backdrop)
 		expect(app.queryByRole('group', {name: 'Страны'})).toBeNull()
 		expect(app.getByRole('button', {name: /^Страны:/}).getAttribute('aria-expanded')).toBe('false')
 	})

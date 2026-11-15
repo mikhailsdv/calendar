@@ -255,6 +255,13 @@
 	}
 }
 
+/* Подложка открытого меню: ниже самого меню (z-index 30), выше всего остального */
+.backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 29;
+}
+
 /* ---------- выбор стран ---------- */
 .countries {
 	grid-area: countries;

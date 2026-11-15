@@ -25,32 +25,33 @@ import {revealDate} from './reveal'
 /** Выпадающее меню: закрывается по клику мимо и по Escape */
 const useDropdown = () => {
 	const [open, setOpen] = useState(false)
-	const ref = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
 		if (!open) return
-		const onDown = (e: Event) => {
-			if (!ref.current?.contains(e.target as Node)) setOpen(false)
-		}
 		const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-		document.addEventListener('pointerdown', onDown)
 		document.addEventListener('keydown', onKey)
-		return () => {
-			document.removeEventListener('pointerdown', onDown)
-			document.removeEventListener('keydown', onKey)
-		}
+		return () => document.removeEventListener('keydown', onKey)
 	}, [open])
 
-	return {open, setOpen, ref}
+	return {open, setOpen}
 }
+
+/**
+ * Прозрачная подложка под открытым меню. Клик мимо меню попадает в неё и только закрывает меню,
+ * элемент под ней не срабатывает
+ */
+const Backdrop = ({onClose}: {onClose: () => void}) => (
+	<div class={s.backdrop} aria-hidden="true" onClick={onClose} />
+)
 
 export const LangSwitcher = ({hrefFor}: {hrefFor: (lang: Lang) => string}) => {
 	const store = useStore()
 	const {lang, t} = useI18n()
-	const {open, setOpen, ref} = useDropdown()
+	const {open, setOpen} = useDropdown()
 
 	return (
-		<div class={`${s.langWrap} ${s.wideOnly}`} ref={ref}>
+		<div class={`${s.langWrap} ${s.wideOnly}`}>
+			{open ? <Backdrop onClose={() => setOpen(false)} /> : null}
 			<button
 				type="button"
 				class="btn"
@@ -290,14 +291,15 @@ export const Toolbar = () => {
 export const CountryPicker = () => {
 	const store = useStore()
 	const {t, lang} = useI18n()
-	const {open, setOpen, ref} = useDropdown()
+	const {open, setOpen} = useDropdown()
 	const active = store.settings.value.countries
 	const home = active[0]!
 	const full = active.length >= MAX_COUNTRIES
 	const name = (id: string) => localized(COUNTRIES[id]!.name, lang)
 	return (
 		// На печати страны называют заголовок и легенда
-		<div class={s.countries} ref={ref} data-print="hide">
+		<div class={s.countries} data-print="hide">
+			{open ? <Backdrop onClose={() => setOpen(false)} /> : null}
 			<button
 				type="button"
 				class={`btn ${s.countryBtn}`}

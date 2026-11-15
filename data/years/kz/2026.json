@@ -4,14 +4,22 @@
 	"status": "official",
 	"sources": [
 		{
+			"title": "Минтруд РК: производственный календарь 2026 с изменениями от 29.06.2026",
+			"url": "https://prg.kz/m/amp/document/36825139"
+		},
+		{
+			"title": "Закон РК «О праздниках» (ред. Закона от 11.06.2026 № 306-VIII): День Конституции — 15 марта",
+			"url": "https://adilet.zan.kz/rus/docs/Z010000267_"
+		},
+		{
 			"title": "xmlcalendar.ru",
 			"url": "https://xmlcalendar.ru/data/kz/2026/calendar.json"
 		}
 	],
 	"officialNorms": {
-		"workdays": 246,
+		"workdays": 247,
 		"hours": {
-			"40": 1968
+			"40": 1976
 		}
 	},
 	"days": {
@@ -95,17 +103,6 @@
 		"2026-07-06": {
 			"type": "holiday",
 			"holiday": "capital_day"
-		},
-		"2026-08-30": {
-			"type": "holiday",
-			"holiday": "constitution_day"
-		},
-		"2026-08-31": {
-			"type": "dayoff",
-			"transfer": {
-				"from": "2026-08-30"
-			},
-			"basis": "weekend-holiday-rule"
 		},
 		"2026-10-25": {
 			"type": "holiday",

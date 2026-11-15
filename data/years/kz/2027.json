@@ -5,6 +5,10 @@
 	"statusNote": "Переносы посчитаны по правилу «праздник на выходном → следующий рабочий день». Перенос 02.01 → 04.01 подтверждён в СМИ, остальное — расчёт. Правительство может добавить мосты. Курбан айт — по календарю ДУМК, может сдвинуться на день.",
 	"sources": [
 		{
+			"title": "Закон РК «О праздниках» (ред. Закона от 11.06.2026 № 306-VIII): День Конституции — 15 марта",
+			"url": "https://adilet.zan.kz/rus/docs/Z010000267_"
+		},
+		{
 			"title": "lada.kz: Курбан айт 2027 без переноса",
 			"url": "https://www.lada.kz/kazakhstan-news/160388-kazakhstantsy-ostanutsia-bez-dopolnitelnogo-vykhodnogo-na-kurban-ait-v-2027-godu.html"
 		},
@@ -41,6 +45,10 @@
 			"type": "observance",
 			"holiday": "oraza_ait",
 			"tentative": true
+		},
+		"2027-03-15": {
+			"type": "holiday",
+			"holiday": "constitution_day"
 		},
 		"2027-03-21": {
 			"type": "holiday",
@@ -95,10 +103,6 @@
 		"2027-07-06": {
 			"type": "holiday",
 			"holiday": "capital_day"
-		},
-		"2027-08-30": {
-			"type": "holiday",
-			"holiday": "constitution_day"
 		},
 		"2027-10-25": {
 			"type": "holiday",

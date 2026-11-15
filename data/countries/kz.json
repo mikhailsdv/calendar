@@ -202,8 +202,9 @@
 			},
 			"kind": "public",
 			"rule": {
-				"fixed": ["08-30"]
-			}
+				"fixed": ["03-15"]
+			},
+			"validFrom": "2026-07-01"
 		},
 		"republic_day": {
 			"name": {

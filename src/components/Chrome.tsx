@@ -308,7 +308,8 @@ export const CountryPicker = () => {
 				onClick={() => setOpen(!open)}
 			>
 				<span class={s.flags}>
-					{active.map(id => (
+					{/* Основная страна последней: её флаг стоит рядом с названием */}
+					{[...active.slice(1), home].map(id => (
 						<Flag key={id} code={id} />
 					))}
 				</span>

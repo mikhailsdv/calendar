@@ -206,6 +206,7 @@ const kk: Dict = {
 		telegramDm: 'Telegram-да жазу',
 		cv: 'Түйіндеме',
 		projects: 'Басқа жобалар',
+		github: 'GitHub',
 		dataNote: 'Деректер ресми дереккөздермен салыстырылған. Қате тапсаңыз, жазыңыз.',
 	},
 	root: {

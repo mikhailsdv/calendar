@@ -225,6 +225,7 @@ const ru = {
 		telegramDm: 'Написать в Telegram',
 		cv: 'Резюме',
 		projects: 'Другие проекты',
+		github: 'GitHub',
 		dataNote: 'Данные сверены с официальными источниками. Нашли ошибку — напишите.',
 	},
 	root: {

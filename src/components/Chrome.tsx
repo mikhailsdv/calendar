@@ -13,6 +13,7 @@ import {
 	ChevronDown,
 	ChevronLeft,
 	ChevronRight,
+	GitHubIcon,
 	MoonIcon,
 	PrinterIcon,
 	SettingsIcon,
@@ -508,6 +509,7 @@ const FOOTER_LINKS = [
 	['telegramDm', AUTHOR_LINKS.telegramDm, 'telegram_dm'],
 	['cv', AUTHOR_LINKS.cv, 'cv'],
 	['projects', AUTHOR_LINKS.projects, 'projects'],
+	['github', AUTHOR_LINKS.github, 'github'],
 ] as const
 
 export const Footer = () => {
@@ -529,6 +531,7 @@ export const Footer = () => {
 						rel="noopener"
 						onClick={() => track('outbound_click', {target})}
 					>
+						{key === 'github' && <GitHubIcon />}
 						{t.footer[key]}
 					</a>
 				))}

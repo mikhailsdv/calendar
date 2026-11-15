@@ -222,6 +222,7 @@ const be: Dict = {
 		telegramDm: 'Напісаць у Telegram',
 		cv: 'Рэзюмэ',
 		projects: 'Іншыя праекты',
+		github: 'GitHub',
 		dataNote: 'Даныя звераны з афіцыйнымі крыніцамі. Знайшлі памылку — напішыце.',
 	},
 	root: {

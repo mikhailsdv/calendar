@@ -222,6 +222,7 @@ const uk: Dict = {
 		telegramDm: 'Написати в Telegram',
 		cv: 'Резюме',
 		projects: 'Інші проєкти',
+		github: 'GitHub',
 		dataNote: 'Дані звірено з офіційними джерелами. Знайшли помилку — напишіть.',
 	},
 	root: {

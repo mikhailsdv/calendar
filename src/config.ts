@@ -33,6 +33,7 @@ export const AUTHOR_LINKS = {
 	telegramDm: 'https://t.me/mikhailsdv',
 	cv: 'https://cv.mishasaidov.com/',
 	projects: 'https://articles.mishasaidov.com/projects',
+	github: 'https://github.com/mikhailsdv/calendar',
 } as const
 
 export const isLang = (value: unknown): value is Lang =>

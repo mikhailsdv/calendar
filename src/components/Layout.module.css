@@ -556,6 +556,18 @@
 	gap: 6px 16px;
 }
 
+/* Иконка у ссылки на GitHub */
+.footerLinks a {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+}
+
+.footerLinks :global(.icon) {
+	width: 16px;
+	height: 16px;
+}
+
 /* ---------- language menu ---------- */
 .langWrap {
 	position: relative;

@@ -26,7 +26,7 @@
 | `vacation_select` | Выбран диапазон отпуска | `days` — календарных дней<br>`countries` — сколько стран в наложении |
 | `vacation_cancel` | Выделение отпуска сброшено | — |
 | `settings_open` | Открыты настройки | — |
-| `outbound_click` | Переход по ссылке автора в футере | `target` — telegram_channel \| telegram_dm \| cv \| projects |
+| `outbound_click` | Переход по ссылке в футере | `target` — telegram_channel \| telegram_dm \| cv \| projects \| github |
 | `today_click` | Нажата кнопка «Сегодня» | `view` — year \| month |
 | `print_click` | Нажата кнопка печати в шапке | `view` — вид календаря при печати |
 | `spoiler_toggle` | Раскрыт или свёрнут спойлер: праздники страны или нормы по месяцам | `section` — holidays \| monthly<br>`country` — id страны, только для holidays<br>`state` — open \| close |

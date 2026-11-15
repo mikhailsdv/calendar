@@ -72,9 +72,9 @@
 		"params": {}
 	},
 	"outbound_click": {
-		"description": "Переход по ссылке автора в футере",
+		"description": "Переход по ссылке в футере",
 		"params": {
-			"target": "telegram_channel | telegram_dm | cv | projects"
+			"target": "telegram_channel | telegram_dm | cv | projects | github"
 		}
 	},
 	"today_click": {

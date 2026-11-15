@@ -207,6 +207,7 @@ const hy: Dict = {
 		telegramDm: 'Գրել Telegram-ում',
 		cv: 'Ինքնակենսագրություն',
 		projects: 'Այլ նախագծեր',
+		github: 'GitHub',
 		dataNote: 'Տվյալները համեմատված են պաշտոնական աղբյուրների հետ։ Սխալ եք գտել՝ գրեք։',
 	},
 	root: {

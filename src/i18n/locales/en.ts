@@ -206,6 +206,7 @@ const en: Dict = {
 		telegramDm: 'Message me on Telegram',
 		cv: 'CV',
 		projects: 'Other projects',
+		github: 'GitHub',
 		dataNote: 'Data is checked against official sources. Found a mistake? Let me know.',
 	},
 	root: {

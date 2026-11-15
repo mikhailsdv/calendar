@@ -90,20 +90,20 @@ const Upcoming = () => {
 								})
 							}}
 						>
-							<div>
-								{item.holiday ? localized(item.holiday.name, lang) : t.kinds.holiday}
-								<span>
-									{formatDate(i18n, item.date, 'short')},{' '}
-									{weekdayShort(i18n, isoWeekday(item.date))} · {relativeDay(i18n, item.daysUntil)}
-									{item.rest.days >= 3
-										? ` · ${fmt(t.upcoming.rest, {days: plural(lang, t.plural.days, item.rest.days)})}`
-										: ''}
+							<span class={s.windowHead}>
+								<span>{item.holiday ? localized(item.holiday.name, lang) : t.kinds.holiday}</span>
+								<span class={s.flags}>
+									{item.countries.map(c => (
+										<Flag key={c.id} code={c.id} />
+									))}
 								</span>
-							</div>
-							<span class={s.flags}>
-								{item.countries.map(c => (
-									<Flag key={c.id} code={c.id} />
-								))}
+							</span>
+							<span class={s.windowMeta}>
+								{formatDate(i18n, item.date, 'short')}, {weekdayShort(i18n, isoWeekday(item.date))}{' '}
+								· {relativeDay(i18n, item.daysUntil)}
+								{item.rest.days >= 3
+									? ` · ${fmt(t.upcoming.rest, {days: plural(lang, t.plural.days, item.rest.days)})}`
+									: ''}
 							</span>
 						</button>
 					</li>
